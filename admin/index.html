@@ -52,7 +52,7 @@ window.doLogin=async function doLogin(){
  const msg=document.getElementById('loginMsg');
  const btn=document.getElementById('loginBtn');
  if(!raw||!pw){msg.textContent='মোবাইল/Email এবং Password দিন';return}
- btn.disabled=true;btn.textContent='Logging in...';msg.textContent='';
+ btn.disabled=true;btn.textContent='Logging in...';msg.textContent='Connecting to Supabase…';
  try{
   const clean=raw.replace(/\D/g,'');
   const email=raw.includes('@')?raw:('phone_'+clean+'@taskearn.local');
