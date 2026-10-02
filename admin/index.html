@@ -59,31 +59,28 @@ if(window.runSupabaseDiagnostic)runSupabaseDiagnostic();
 function show(id,btn){document.querySelectorAll('main section').forEach(x=>x.classList.add('hidden'));$(id).classList.remove('hidden');document.querySelectorAll('.nav button').forEach(x=>x.classList.remove('active'));if(btn)btn.classList.add('active');if(id==='networks')loadNetworks();if(id==='offers')loadOffers();if(id==='tasks')loadTasks();if(id==='support')loadSupport();}
 function showById(id){show(id,[...document.querySelectorAll('.nav button')].find(b=>b.textContent.toLowerCase().includes(id==='networks'?'earning':'offers')))}
 window.doLogin=async function doLogin(){
- const raw=document.getElementById('email').value.trim();
- const pw=document.getElementById('pass').value;
- const msg=document.getElementById('loginMsg');
- const btn=document.getElementById('loginBtn');
+ const raw=$('email').value.trim(), pw=$('pass').value, msg=$('loginMsg'), btn=$('loginBtn');
  if(!raw||!pw){msg.textContent='মোবাইল/Email এবং Password দিন';return}
- btn.disabled=true;btn.textContent='Logging in...';msg.textContent='Connecting to Supabase…';
+ btn.disabled=true;btn.textContent='Connecting...';msg.textContent='Supabase SDK loading…';
  try{
-  const clean=raw.replace(/\D/g,'');
-  const email=raw.includes('@')?raw:('phone_'+clean+'@taskearn.local');
-  const res=await db.auth.signInWithPassword({email,password:pw});
+  const client=await initDb();
+  msg.textContent='Signing in…';
+  const clean=raw.replace(/\D/g,''), email=raw.includes('@')?raw:('phone_'+clean+'@taskearn.local');
+  const res=await client.auth.signInWithPassword({email,password:pw});
   if(res.error){msg.textContent='Login failed: '+res.error.message;return}
   if(!res.data?.session){msg.textContent='Login failed: session পাওয়া যায়নি';return}
-  const check=await db.from('profiles').select('role,is_blocked').eq('id',res.data.user.id).maybeSingle();
-  if(check.error){msg.textContent='Admin profile check failed: '+check.error.message;await db.auth.signOut();return}
-  if(!check.data){msg.textContent='Admin profile পাওয়া যায়নি।';await db.auth.signOut();return}
-  if(check.data.is_blocked===true){msg.textContent='এই Admin account ব্লক করা হয়েছে।';await db.auth.signOut();return}
-  if(check.data.role!=='admin'){msg.textContent='এই account-এর Admin permission নেই।';await db.auth.signOut();return}
-  document.getElementById('login').classList.add('hidden');
-  document.getElementById('panel').classList.remove('hidden');
-  await refreshAll();
- }catch(err){msg.textContent='Error: '+(err?.message||err)}
+  msg.textContent='Admin profile checking…';
+  const check=await client.from('profiles').select('role,is_blocked').eq('id',res.data.user.id).maybeSingle();
+  if(check.error){msg.textContent='Admin profile check failed: '+check.error.message;await client.auth.signOut();return}
+  if(!check.data){msg.textContent='Admin profile পাওয়া যায়নি।';await client.auth.signOut();return}
+  if(check.data.is_blocked===true){msg.textContent='এই Admin account ব্লক করা হয়েছে।';await client.auth.signOut();return}
+  if(check.data.role!=='admin'){msg.textContent='এই account-এর Admin permission নেই।';await client.auth.signOut();return}
+  $('login').classList.add('hidden');$('panel').classList.remove('hidden');await refreshAll();
+ }catch(err){msg.textContent='Login error: '+(err?.message||err)}
  finally{btn.disabled=false;btn.textContent='Login'}
 }
 window.openPanel=async function openPanel(){$('login').classList.add('hidden');$('panel').classList.remove('hidden');await refreshAll()}
-window.logout=async function logout(){await db.auth.signOut();location.reload()}
+window.logout=async function logout(){const client=await initDb();await client.auth.signOut();location.reload()}
 async function refreshAll(){let [u,t,n,o]=await Promise.all([db.from('profiles').select('id',{count:'exact',head:true}),db.from('tasks').select('id',{count:'exact',head:true}).eq('is_active',true),db.from('earning_networks').select('*').order('created_at',{ascending:false}),db.from('network_offers').select('id',{count:'exact',head:true})]);$('users').textContent=u.count??0;$('tasksCount').textContent=t.count??0;networks=n.data||[];$('netCount').textContent=networks.length;$('offerCount').textContent=o.count??0;renderNetworks()}
 function renderNetworks(){$('networkList').innerHTML=networks.map(n=>'<div class="offer"><div class="row"><div><b>'+esc(n.name)+'</b> <span class="pill">'+esc(n.provider)+'</span><div class="muted">'+esc(n.publisher_id||'No ID')+' · '+esc(n.country||'')+'</div></div><div><span class="pill">'+esc(n.status)+'</span> <button class="btn" onclick="editNetwork('+n.id+')">Edit</button> <button class="btn red" onclick="deleteNetwork('+n.id+')">Delete</button></div></div></div>').join('')||'<p class="muted">কোনো earning network যোগ করা হয়নি।</p>'}
 function newNetwork(){$('networkForm').classList.remove('hidden');['nid','nname','nprovider','npub','nkey','nsecret','nendpoint','nreward','nmargin'].forEach(i=>$(i).value='');$('ncountry').value='BD';$('nstatus').value='inactive'}
@@ -99,5 +96,5 @@ async function saveSupport(){let r=await db.rpc('admin_update_support_settings',
 function esc(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]))}
 document.getElementById('loginBtn').addEventListener('click',doLogin);
 document.getElementById('pass').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin()});
-(async()=>{try{await initDb();let s=await db.auth.getSession();if(s.data?.session){let a=await db.from('profiles').select('role,is_blocked').eq('id',s.data.session.user.id).maybeSingle();if(!a.error&&a.data?.role==='admin'&&a.data?.is_blocked!==true)openPanel();else await db.auth.signOut()}}catch(e){}})();
+(async()=>{try{const client=await initDb();let s=await client.auth.getSession();if(s.data?.session){let a=await client.from('profiles').select('role,is_blocked').eq('id',s.data.session.user.id).maybeSingle();if(!a.error&&a.data?.role==='admin'&&a.data?.is_blocked!==true)openPanel();else await client.auth.signOut()}}catch(e){}})();
 </script></body></html>
