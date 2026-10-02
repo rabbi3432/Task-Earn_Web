@@ -20,9 +20,7 @@ window.runSupabaseDiagnostic=function(){
 <script>
 window.addEventListener('DOMContentLoaded', function(){
   var btn=document.getElementById('loginBtn');
-  if(btn){
-    btn.onclick=function(e){e.preventDefault(); if(typeof window.doLogin==='function') window.doLogin(); else document.getElementById('loginMsg').textContent='Login system loading…';};
-  }
+  if(btn){ btn.onclick=function(e){ e.preventDefault(); if(typeof window.doLogin==='function') window.doLogin(); else document.getElementById('loginMsg').textContent='Login system failed to initialize. Refresh করুন।'; }; }
 });
 </script>
 <style>
@@ -40,9 +38,10 @@ window.addEventListener('DOMContentLoaded', function(){
 </main></div>
 <script>
 const URL='https://gzamivqrrflogjjvhbej.supabase.co',KEY='sb_publishable_emPACnJ0LsZ1GjParqjJVA_wDO3faQg';
+const $=id=>document.getElementById(id);
 let db;
-try{db=supabase.createClient(URL,KEY)}catch(e){const el=$('serverStatus');if(el){el.textContent='Supabase SDK load failed: '+(e?.message||'CDN blocked');el.style.color='#b91c1c'}}
-const $=id=>document.getElementById(id);let networks=[];
+try{db=supabase.createClient(URL,KEY)}catch(e){const el=document.getElementById('serverStatus');if(el){el.textContent='Supabase SDK load failed: '+(e?.message||'CDN blocked');el.style.color='#b91c1c'}}
+let networks=[];
 if(window.runSupabaseDiagnostic)runSupabaseDiagnostic();
 function show(id,btn){document.querySelectorAll('main section').forEach(x=>x.classList.add('hidden'));$(id).classList.remove('hidden');document.querySelectorAll('.nav button').forEach(x=>x.classList.remove('active'));if(btn)btn.classList.add('active');if(id==='networks')loadNetworks();if(id==='offers')loadOffers();if(id==='tasks')loadTasks();if(id==='support')loadSupport();}
 function showById(id){show(id,[...document.querySelectorAll('.nav button')].find(b=>b.textContent.toLowerCase().includes(id==='networks'?'earning':'offers')))}
