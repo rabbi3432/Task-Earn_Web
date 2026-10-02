@@ -39,9 +39,22 @@ window.addEventListener('DOMContentLoaded', function(){
 <script>
 const URL='https://gzamivqrrflogjjvhbej.supabase.co',KEY='sb_publishable_emPACnJ0LsZ1GjParqjJVA_wDO3faQg';
 const $=id=>document.getElementById(id);
-let db;
-try{db=supabase.createClient(URL,KEY)}catch(e){const el=document.getElementById('serverStatus');if(el){el.textContent='Supabase SDK load failed: '+(e?.message||'CDN blocked');el.style.color='#b91c1c'}}
-let networks=[];
+let db=null, networks=[];
+async function initDb(){
+ if(db)return db;
+ if(!window.supabase){
+  await new Promise((resolve,reject)=>{
+   const s=document.createElement('script');
+   s.src='https://unpkg.com/@supabase/supabase-js@2';
+   s.onload=resolve; s.onerror=()=>reject(new Error('Supabase SDK CDN load failed'));
+   document.head.appendChild(s);
+  });
+ }
+ if(!window.supabase||typeof window.supabase.createClient!=='function') throw new Error('Supabase SDK unavailable');
+ db=window.supabase.createClient(URL,KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:false}});
+ return db;
+}
+initDb().catch(e=>{const el=document.getElementById('serverStatus');if(el){el.textContent='Supabase SDK error: '+e.message;el.style.color='#b91c1c'}});
 if(window.runSupabaseDiagnostic)runSupabaseDiagnostic();
 function show(id,btn){document.querySelectorAll('main section').forEach(x=>x.classList.add('hidden'));$(id).classList.remove('hidden');document.querySelectorAll('.nav button').forEach(x=>x.classList.remove('active'));if(btn)btn.classList.add('active');if(id==='networks')loadNetworks();if(id==='offers')loadOffers();if(id==='tasks')loadTasks();if(id==='support')loadSupport();}
 function showById(id){show(id,[...document.querySelectorAll('.nav button')].find(b=>b.textContent.toLowerCase().includes(id==='networks'?'earning':'offers')))}
@@ -86,5 +99,5 @@ async function saveSupport(){let r=await db.rpc('admin_update_support_settings',
 function esc(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]))}
 document.getElementById('loginBtn').addEventListener('click',doLogin);
 document.getElementById('pass').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin()});
-(async()=>{try{let s=await db.auth.getSession();if(s.data?.session){let a=await db.from('profiles').select('role,is_blocked').eq('id',s.data.session.user.id).maybeSingle();if(!a.error&&a.data?.role==='admin'&&a.data?.is_blocked!==true)openPanel();else await db.auth.signOut()}}catch(e){}})();
+(async()=>{try{await initDb();let s=await db.auth.getSession();if(s.data?.session){let a=await db.from('profiles').select('role,is_blocked').eq('id',s.data.session.user.id).maybeSingle();if(!a.error&&a.data?.role==='admin'&&a.data?.is_blocked!==true)openPanel();else await db.auth.signOut()}}catch(e){}})();
 </script></body></html>
