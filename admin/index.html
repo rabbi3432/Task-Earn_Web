@@ -20,7 +20,27 @@ const URL='https://gzamivqrrflogjjvhbej.supabase.co',KEY='sb_publishable_emPACnJ
 const $=id=>document.getElementById(id);let networks=[];
 function show(id,btn){document.querySelectorAll('main section').forEach(x=>x.classList.add('hidden'));$(id).classList.remove('hidden');document.querySelectorAll('.nav button').forEach(x=>x.classList.remove('active'));if(btn)btn.classList.add('active');if(id==='networks')loadNetworks();if(id==='offers')loadOffers();if(id==='tasks')loadTasks();if(id==='support')loadSupport();}
 function showById(id){show(id,[...document.querySelectorAll('.nav button')].find(b=>b.textContent.toLowerCase().includes(id==='networks'?'earning':'offers')))}
-window.doLogin=async function doLogin(){let raw=$(\'email\').value.trim();let email=raw.includes(\'@\')?raw:\'phone_\'+raw.replace(/\\D/g,\'\')+\'@taskearn.local\';let {data,error}=await db.auth.signInWithPassword({email,password:$(\'pass\').value});if(error){$(\'loginMsg\').textContent=\'লগইন ব্যর্থ: \'+error.message;return}let a=await db.rpc(\'is_admin\');if(a.error){$(\'loginMsg\').textContent=\'Admin যাচাই ব্যর্থ: \'+a.error.message;return}if(!a.data){await db.auth.signOut();$(\'loginMsg\').textContent=\'এই account Admin নয়।\';return}openPanel()}window.openPanel=async function openPanel(){$('login').classList.add('hidden');$('panel').classList.remove('hidden');await refreshAll()}
+window.doLogin=async function doLogin(){
+ const raw=document.getElementById('email').value.trim();
+ const pw=document.getElementById('pass').value;
+ const msg=document.getElementById('loginMsg');
+ const btn=document.getElementById('loginBtn');
+ if(!raw||!pw){msg.textContent='মোবাইল/Email এবং Password দিন';return}
+ btn.disabled=true;btn.textContent='Logging in...';msg.textContent='';
+ try{
+  const email=raw.indexOf('@')>=0?raw:'phone_'+raw.replace(/\\D/g,'')+'@taskearn.local';
+  const res=await db.auth.signInWithPassword({email:email,password:pw});
+  if(res.error){msg.textContent='Login failed: '+res.error.message;return}
+  const check=await db.rpc('is_admin');
+  if(check.error){msg.textContent='Admin check failed: '+check.error.message;await db.auth.signOut();return}
+  if(check.data!==true){msg.textContent='এই account-এর Admin permission নেই।';await db.auth.signOut();return}
+  document.getElementById('login').classList.add('hidden');
+  document.getElementById('panel').classList.remove('hidden');
+  await refreshAll();
+ }catch(err){msg.textContent='Error: '+(err?.message||err)}
+ finally{btn.disabled=false;btn.textContent='Login'}
+}
+window.openPanel=async function openPanel(){$('login').classList.add('hidden');$('panel').classList.remove('hidden');await refreshAll()}
 window.logout=async function logout(){await db.auth.signOut();location.reload()}
 async function refreshAll(){let [u,t,n,o]=await Promise.all([db.from('profiles').select('id',{count:'exact',head:true}),db.from('tasks').select('id',{count:'exact',head:true}).eq('is_active',true),db.from('earning_networks').select('*').order('created_at',{ascending:false}),db.from('network_offers').select('id',{count:'exact',head:true})]);$('users').textContent=u.count??0;$('tasksCount').textContent=t.count??0;networks=n.data||[];$('netCount').textContent=networks.length;$('offerCount').textContent=o.count??0;renderNetworks()}
 function renderNetworks(){$('networkList').innerHTML=networks.map(n=>'<div class="offer"><div class="row"><div><b>'+esc(n.name)+'</b> <span class="pill">'+esc(n.provider)+'</span><div class="muted">'+esc(n.publisher_id||'No ID')+' · '+esc(n.country||'')+'</div></div><div><span class="pill">'+esc(n.status)+'</span> <button class="btn" onclick="editNetwork('+n.id+')">Edit</button> <button class="btn red" onclick="deleteNetwork('+n.id+')">Delete</button></div></div></div>').join('')||'<p class="muted">কোনো earning network যোগ করা হয়নি।</p>'}
