@@ -4,7 +4,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 *{box-sizing:border-box}body{margin:0;font-family:Arial,'Noto Sans Bengali',sans-serif;background:#f4f7fb;color:#172033}.app{max-width:1100px;margin:auto}.top{background:#172554;color:white;padding:18px;position:sticky;top:0;z-index:5}.top h1{margin:0 0 4px}.muted{color:#6b7280}.top .muted{color:#cbd5e1}.nav{display:flex;gap:8px;overflow:auto;padding:10px;background:#fff;position:sticky;top:77px;z-index:4;border-bottom:1px solid #e5e7eb}.nav button{white-space:nowrap;border:0;background:#eef2ff;padding:10px 13px;border-radius:10px}.nav button.active{background:#172554;color:#fff}.page{padding:14px}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px}.card{background:#fff;border-radius:16px;padding:16px;box-shadow:0 3px 14px #0000000b;margin-bottom:12px}.stat b{font-size:26px}.btn{border:0;border-radius:10px;padding:10px 14px;background:#2563eb;color:white;font-weight:700}.btn.green{background:#16a34a}.btn.red{background:#dc2626}.btn.gray{background:#64748b}.btn.gold{background:#d97706}.input,.select{width:100%;padding:11px;border:1px solid #d7dce5;border-radius:10px;margin:5px 0;font:inherit}.row{display:flex;gap:8px;align-items:center;justify-content:space-between}.table{overflow:auto}.table table{width:100%;border-collapse:collapse;min-width:700px}.table th,.table td{padding:10px;border-bottom:1px solid #edf0f4;text-align:left}.pill{display:inline-block;padding:4px 8px;border-radius:999px;background:#e0f2fe;font-size:12px}.hidden{display:none}.login{max-width:430px;margin:12vh auto;padding:20px}.danger{color:#b91c1c}.offer{border:1px solid #e5e7eb;border-radius:12px;padding:12px;margin:8px 0}
-</style></head><body><div id="login" class="card login"><h1>🛡️ Task Earn Admin</h1><p class="muted">শুধু Admin account দিয়ে প্রবেশ করুন</p><input id="email" class="input" placeholder="Admin মোবাইল / Email"><input id="pass" class="input" type="password" placeholder="Password"><button id="loginBtn" class="btn" style="width:100%" type="button" onclick="doLogin()">Login</button><p id="loginMsg" class="danger"></p></div>
+</style></head><body><div id="login" class="card login"><h1>🛡️ Task Earn Admin</h1><p class="muted">শুধু Admin account দিয়ে প্রবেশ করুন</p><input id="email" class="input" placeholder="Admin মোবাইল / Email"><input id="pass" class="input" type="password" placeholder="Password"><button id="loginBtn" class="btn" style="width:100%" type="button">Login</button><p id="loginMsg" class="danger"></p></div>
 <div id="panel" class="hidden"><div class="top"><div class="row"><div><h1>Task Earn — Admin</h1><div class="muted">পূর্ণ কন্ট্রোল প্যানেল</div></div><button class="btn red" onclick="logout()">Logout</button></div></div>
 <div class="nav"><button onclick="show('dashboard',this)" class="active">📊 Dashboard</button><button onclick="show('networks',this)">🌐 Earning Networks</button><button onclick="show('offers',this)">🎁 Imported Offers</button><button onclick="show('tasks',this)">📝 Tasks</button><button onclick="show('support',this)">🎧 Support</button><button onclick="show('settings',this)">⚙️ Settings</button></div>
 <main class="page">
@@ -28,9 +28,11 @@ window.doLogin=async function doLogin(){
  if(!raw||!pw){msg.textContent='মোবাইল/Email এবং Password দিন';return}
  btn.disabled=true;btn.textContent='Logging in...';msg.textContent='';
  try{
-  const email=raw.indexOf('@')>=0?raw:'phone_'+raw.replace(/\\D/g,'')+'@taskearn.local';
-  const res=await db.auth.signInWithPassword({email:email,password:pw});
+  const clean=raw.replace(/\D/g,'');
+  const email=raw.includes('@')?raw:('phone_'+clean+'@taskearn.local');
+  const res=await db.auth.signInWithPassword({email,password:pw});
   if(res.error){msg.textContent='Login failed: '+res.error.message;return}
+  if(!res.data?.session){msg.textContent='Login failed: session পাওয়া যায়নি';return}
   const check=await db.rpc('is_admin');
   if(check.error){msg.textContent='Admin check failed: '+check.error.message;await db.auth.signOut();return}
   if(check.data!==true){msg.textContent='এই account-এর Admin permission নেই।';await db.auth.signOut();return}
@@ -55,5 +57,7 @@ async function loadTasks(){let r=await db.from('tasks').select('id,title,reward,
 async function loadSupport(){let r=await db.from('support_settings').select('*').eq('id',1).maybeSingle();if(r.data){$('supportUrl').value=r.data.telegram_channel_url||'';$('supportAccount').value=r.data.telegram_account||'';$('supportMsg').value=r.data.support_message||''}}
 async function saveSupport(){let r=await db.rpc('admin_update_support_settings',{p_telegram_channel_url:$('supportUrl').value.trim(),p_telegram_account:$('supportAccount').value.trim(),p_support_message:$('supportMsg').value.trim()});$('supportStatus').textContent=r.error?r.error.message:'সেভ হয়েছে';}
 function esc(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]))}
-(async()=>{let s=await db.auth.getSession();if(s.data?.session){let a=await db.rpc('is_admin');if(a.data)openPanel()}})();
+document.getElementById('loginBtn').addEventListener('click',doLogin);
+document.getElementById('pass').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin()});
+(async()=>{try{let s=await db.auth.getSession();if(s.data?.session){let a=await db.rpc('is_admin');if(a.data===true)openPanel();else await db.auth.signOut()}}catch(e){}})();
 </script></body></html>
