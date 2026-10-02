@@ -37,7 +37,7 @@ window.addEventListener('DOMContentLoaded', function(){
 <section id="settings" class="hidden"><div class="card"><h2>⚙️ Settings</h2><p class="muted">System settings এখান থেকে পরে আরও বাড়ানো যাবে।</p><button class="btn" onclick="refreshAll()">Refresh Data</button></div></section>
 </main></div>
 <script>
-const URL='https://gzamivqrrflogjjvhbej.supabase.co',KEY='sb_publishable_emPACnJ0LsZ1GjParqjJVA_wDO3faQg';
+const SUPABASE_URL='https://gzamivqrrflogjjvhbej.supabase.co',KEY='sb_publishable_emPACnJ0LsZ1GjParqjJVA_wDO3faQg';
 const $=id=>document.getElementById(id);
 let db=null, networks=[];
 async function initDb(){
@@ -51,7 +51,7 @@ async function initDb(){
   });
  }
  if(!window.supabase||typeof window.supabase.createClient!=='function') throw new Error('Supabase SDK unavailable');
- db=window.supabase.createClient(URL,KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:false}});
+ db=window.supabase.createClient(SUPABASE_URL,KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:false}});
  return db;
 }
 initDb().catch(e=>{const el=document.getElementById('serverStatus');if(el){el.textContent='Supabase SDK error: '+e.message;el.style.color='#b91c1c'}});
