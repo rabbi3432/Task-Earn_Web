@@ -71,7 +71,7 @@ async function initDb(){
 }
 initDb().catch(e=>{const el=document.getElementById('serverStatus');if(el){el.textContent='Supabase SDK error: '+e.message;el.style.color='#b91c1c'}});
 if(window.runSupabaseDiagnostic)runSupabaseDiagnostic();
-function show(id,btn){document.querySelectorAll('main section').forEach(x=>x.classList.add('hidden'));$(id).classList.remove('hidden');document.querySelectorAll('.nav button').forEach(x=>x.classList.remove('active'));if(btn)btn.classList.add('active');if(id==='networks')loadNetworks();if(id==='offers')loadOffers();if(id==='tasks')loadTasks();if(id==='submissions')loadSubmissions();if(id==='withdrawals')loadWithdrawals();if(id==='support')loadSupport();if(id==='settings')loadSystemSettings();}
+function show(id,btn){document.querySelectorAll('main section').forEach(x=>x.classList.add('hidden'));$(id).classList.remove('hidden');document.querySelectorAll('.nav button').forEach(x=>x.classList.remove('active'));if(btn)btn.classList.add('active');if(id==='networks')loadNetworks();if(id==='offers')loadOffers();if(id==='tasks')loadTasks();if(id==='submissions')loadSubmissions();if(id==='withdrawals')loadWithdrawals();if(id==='support')loadSupport();if(id==='settings'){loadSystemSettings();loadReferralSettings();}}
 function showById(id){show(id,[...document.querySelectorAll('.nav button')].find(b=>b.textContent.toLowerCase().includes(id==='networks'?'earning':'offers')))}
 window.doLogin=async function doLogin(){
  const raw=$('email').value.trim(), pw=$('pass').value, msg=$('loginMsg'), btn=$('loginBtn');
