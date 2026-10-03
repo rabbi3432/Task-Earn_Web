@@ -1,4 +1,4 @@
-<!doctype html><html lang="bn"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>TakaEarn</title><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;600;700&display=swap" rel="stylesheet"><style>body{margin:0;font-family:'Hind Siliguri',sans-serif;background:#f4faf6;color:#173b28}.wrap{max-width:520px;margin:auto;padding:16px}.card{background:#fff;border-radius:18px;padding:18px;margin:12px 0;box-shadow:0 5px 20px #0001}.brand{text-align:center;padding:20px}.brand h1{color:#159447}.input{width:100%;padding:13px;margin:7px 0;border:1px solid #d9e4dd;border-radius:12px;font:inherit}.btn{border:0;border-radius:12px;padding:12px 16px;background:#159447;color:white;font:inherit;font-weight:700}.gold{background:#e7a900}.tabs,.row,.nav{display:flex;gap:8px}.tabs button,.nav button{flex:1}.row{justify-content:space-between;align-items:center}.hidden{display:none}.amount{font-size:34px;font-weight:700}.task{border:1px solid #e4eee7;padding:14px;border-radius:14px;margin:9px 0}.muted{color:#718278}</style><style>.icon-menu{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;margin:12px 0 16px}.mi{border:1px solid #e1eee5;background:#fff;border-radius:16px;padding:10px 3px;min-height:88px;font:inherit;color:#173b28;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;box-shadow:0 4px 16px #0000000b}.mi:active{transform:scale(.96)}.mi b{font-size:12px}.mi small{font-size:9px;color:#718278}.ico{width:39px;height:39px;border-radius:13px;display:grid;place-items:center;font-weight:800;font-size:18px}.ico.task{background:#e8f7f2;color:#159447}.ico.wallet{background:#eaf1ff;color:#3674e8}.ico.out{background:#fff1df;color:#e58a13}.ico.ref{background:#f1eaff;color:#8055d8}.ico.check{background:#e7f8e9;color:#25a244}.ico.spin{background:#fff0f4;color:#e44976}.ico.note{background:#eaf8ff;color:#1688b7}.ico.prof{background:#f1f3f5;color:#58636f}@media(max-width:360px){.icon-menu{gap:6px}.mi{min-height:82px}.ico{width:35px;height:35px}.mi small{display:none}}</style></head><body><div class="wrap"><section id="auth" class="card"><div class="brand"><div>🪙</div><h1>TakaEarn</h1><p>অনলাইনে আয় করুন সহজে</p></div><div class="tabs"><button class="btn" onclick="mode(1)">লগইন</button><button class="btn gold" onclick="mode(0)">রেজিস্টার</button></div><div id="loginPanel"><input id="lp" class="input" placeholder="মোবাইল নাম্বার"><input id="lpass" class="input" type="password" placeholder="পাসওয়ার্ড"><button class="btn" id="loginBtn">লগইন করুন</button></div><div id="reg" class="hidden"><input id="rn" class="input" placeholder="আপনার নাম"><input id="rp" class="input" placeholder="মোবাইল নাম্বার"><input id="rpass" class="input" type="password" placeholder="পাসওয়ার্ড"><input id="rr" class="input" placeholder="রেফার কোড (ঐচ্ছিক)"><button class="btn" id="registerBtn">রেজিস্টার করুন</button></div><p id="msg" class="muted"></p></section><section id="app" class="hidden">
+<!doctype html><html lang="bn"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>TakaEarn</title><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;600;700&display=swap" rel="stylesheet"><style>body{margin:0;font-family:'Hind Siliguri',sans-serif;background:#f4faf6;color:#173b28}.wrap{max-width:520px;margin:auto;padding:16px}.card{background:#fff;border-radius:18px;padding:18px;margin:12px 0;box-shadow:0 5px 20px #0001}.brand{text-align:center;padding:20px}.brand h1{color:#159447}.input{width:100%;padding:13px;margin:7px 0;border:1px solid #d9e4dd;border-radius:12px;font:inherit}.btn{border:0;border-radius:12px;padding:12px 16px;background:#159447;color:white;font:inherit;font-weight:700}.gold{background:#e7a900}.tabs,.row,.nav{display:flex;gap:8px}.tabs button,.nav button{flex:1}.row{justify-content:space-between;align-items:center}.hidden{display:none}.amount{font-size:34px;font-weight:700}.task{border:1px solid #e4eee7;padding:14px;border-radius:14px;margin:9px 0}.muted{color:#718278}</style><style>.icon-menu{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;margin:12px 0 16px}.mi{border:1px solid #e1eee5;background:#fff;border-radius:16px;padding:10px 3px;min-height:88px;font:inherit;color:#173b28;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;box-shadow:0 4px 16px #0000000b}.mi:active{transform:scale(.96)}.mi b{font-size:12px}.mi small{font-size:9px;color:#718278}.ico{width:39px;height:39px;border-radius:13px;display:grid;place-items:center;font-weight:800;font-size:18px}.ico.task{background:#e8f7f2;color:#159447}.ico.wallet{background:#eaf1ff;color:#3674e8}.ico.out{background:#fff1df;color:#e58a13}.ico.ref{background:#f1eaff;color:#8055d8}.ico.check{background:#e7f8e9;color:#25a244}.ico.spin{background:#fff0f4;color:#e44976}.ico.note{background:#eaf8ff;color:#1688b7}.ico.prof{background:#f1f3f5;color:#58636f}@media(max-width:360px){.icon-menu{gap:6px}.mi{min-height:82px}.ico{width:35px;height:35px}.mi small{display:none}}.task-actions{display:flex;gap:8px;margin-top:10px}.task-actions .btn{flex:1}.modal{position:fixed;inset:0;background:#0008;display:flex;align-items:flex-end;justify-content:center;z-index:50}.modal.hidden{display:none}.modal-card{width:min(520px,100%);max-height:88vh;overflow:auto;background:#fff;border-radius:22px 22px 0 0;padding:18px;box-sizing:border-box}.proof-box{background:#f7faf8;border:1px solid #e1ebe5;border-radius:14px;padding:12px;margin-top:12px}.proof-option{display:inline-block;margin:4px 4px 4px 0}.proof-option input{margin-right:4px}.danger{background:#777}</style></head><body><div class="wrap"><section id="auth" class="card"><div class="brand"><div>🪙</div><h1>TakaEarn</h1><p>অনলাইনে আয় করুন সহজে</p></div><div class="tabs"><button class="btn" onclick="mode(1)">লগইন</button><button class="btn gold" onclick="mode(0)">রেজিস্টার</button></div><div id="loginPanel"><input id="lp" class="input" placeholder="মোবাইল নাম্বার"><input id="lpass" class="input" type="password" placeholder="পাসওয়ার্ড"><button class="btn" id="loginBtn">লগইন করুন</button></div><div id="reg" class="hidden"><input id="rn" class="input" placeholder="আপনার নাম"><input id="rp" class="input" placeholder="মোবাইল নাম্বার"><input id="rpass" class="input" type="password" placeholder="পাসওয়ার্ড"><input id="rr" class="input" placeholder="রেফার কোড (ঐচ্ছিক)"><button class="btn" id="registerBtn">রেজিস্টার করুন</button></div><p id="msg" class="muted"></p></section><section id="app" class="hidden">
 <div class="row card"><div><b id="name">User</b><div class="muted" id="phone"></div></div><button class="btn" onclick="logout()">লগআউট</button></div>
 <div class="card"><div class="muted">মোট ব্যালেন্স</div><div class="amount">৳ <span id="bal">0.00</span></div></div>
 <div id="menu" class="icon-menu">
@@ -22,7 +22,19 @@
 <div id="noti" class="page card hidden"><h2>🔔 নোটিফিকেশন</h2><div id="notes"></div></div>
 <div id="profile" class="page card hidden"><h2>👤 প্রোফাইল</h2><p><b>নাম:</b> <span id="profileName"></span></p><p><b>মোবাইল:</b> <span id="profilePhone"></span></p></div>
 <div id="support" class="page card hidden"><div class="row"><div><h2 style="margin:0">🎧 কাস্টমার সাপোর্ট</h2><p id="supportMsg" class="muted">যেকোনো সমস্যায় আমাদের সাথে যোগাযোগ করুন।</p></div></div><a id="supportLink" class="btn" href="#" target="_blank" rel="noopener" style="display:block;text-align:center;text-decoration:none;margin-top:10px">সাপোর্টে যোগাযোগ করুন</a></div>
-<div id="pageNav" class="nav hidden"><button class="btn" onclick="page('tasks')">← টাস্ক</button><button class="btn" onclick="page('menu')">☰ মেনু</button></div>
+<div id="taskModal" class="modal hidden">
+<div class="modal-card">
+<div class="row"><h2 id="taskModalTitle">Task</h2><button class="btn danger" onclick="closeTask()">✕</button></div>
+<div id="taskModalBody"></div>
+<div id="proofArea" class="proof-box hidden">
+<h3>📤 Submit Proof</h3>
+<div id="proofTypes"></div>
+<textarea id="proofText" class="input" rows="4" placeholder="প্রমাণ / Text proof লিখুন"></textarea>
+<input id="proofLink" class="input" placeholder="Proof link (যদি প্রয়োজন হয়)">
+<input id="proofFile" class="input" type="file" accept="image/*,.pdf,.doc,.docx">
+<button class="btn" onclick="submitCurrentTask()">Submit Proof</button>
+</div>
+</div></div><div id="pageNav" class="nav hidden"><button class="btn" onclick="page('tasks')">← টাস্ক</button><button class="btn" onclick="page('menu')">☰ মেনু</button></div>
 </section><script>
 const SUPABASE_URL='https://gzamivqrrflogjjvhbej.supabase.co';
 const SUPABASE_KEY='sb_publishable_emPACnJ0LsZ1GjParqjJVA_wDO3faQg';
@@ -75,11 +87,43 @@ async function load(){
  ]);
  if(p.error)say('প্রোফাইল লোড হয়নি: '+p.error.message);
  const x=p.data;q('name').textContent=x?.full_name||'User';q('phone').textContent=x?.phone||'';q('profileName').textContent=x?.full_name||'User';q('profilePhone').textContent=x?.phone||'';q('bal').textContent=Number(x?.money_balance||0).toFixed(2);q('walletBal').textContent=Number(x?.money_balance||0).toFixed(2);q('code').textContent=x?.referral_code||'—';q('refs').textContent='মোট রেফার: '+(r.data||[]).length;
- q('taskList').innerHTML=(t.data||[]).map(v=>'<div class="task"><div class="row"><b>'+v.title+'</b><b>৳'+Number(v.reward||0).toFixed(2)+'</b></div><p class="muted">'+(v.description||'')+'</p><div class="muted">Proof: '+escProof(v.proof_types||['text'])+'</div><button class="btn" onclick="submitTask('+v.id+')">📤 Submit Proof</button></div>').join('')||'<p>কোনো সক্রিয় টাস্ক নেই</p>'; 
+ q('taskList').innerHTML=(t.data||[]).map(v=>'<div class="task"><div class="row"><b>'+esc(v.title)+'</b><b>৳'+Number(v.reward||0).toFixed(2)+'</b></div><p class="muted">'+esc(v.description||'')+'</p><div class="muted">Proof: '+escProof(v.proof_types||['text'])+'</div><div class="task-actions"><button class="btn" onclick="openTask('+v.id+')">▶️ Complete Task</button></div></div>').join('')||'<p>কোনো সক্রিয় টাস্ক নেই</p>'; 
  q('notes').innerHTML=(n.data||[]).map(v=>'<div class="task"><b>'+v.title+'</b><div>'+v.body+'</div></div>').join('')||'কোনো নোটিফিকেশন নেই';
 }
 function escProof(a){return Array.isArray(a)?a.join(', '):String(a||'text')}
-async function submitTask(id){const p=prompt('Text proof / প্রমাণ লিখুন');if(!p)return;const link=prompt('Proof link (প্রয়োজনে দিন, না হলে Cancel চাপুন)')||null;const r=await db.rpc('submit_task_with_proofs',{p_task_id:id,p_proof:p,p_proof_link:link,p_proof_files:[]});alert(r.error?r.error.message:'Submission পাঠানো হয়েছে; Admin review-এর পর reward যোগ হবে');load()}
+let currentTask=null;
+function esc(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
+async function openTask(id){
+ const r=await db.from('tasks').select('*').eq('id',id).eq('is_active',true).maybeSingle();
+ if(r.error||!r.data){alert(r.error?.message||'Task পাওয়া যায়নি');return}
+ currentTask=r.data;
+ q('taskModalTitle').textContent=currentTask.title||'Task';
+ q('taskModalBody').innerHTML='<p>'+esc(currentTask.description||'এই টাস্কটি সম্পন্ন করুন।')+'</p><p><b>Reward:</b> ৳'+Number(currentTask.reward||0).toFixed(2)+'</p><p class="muted"><b>Required proof:</b> '+escProof(currentTask.proof_types||['text'])+'</p><button class="btn" onclick="showProofForm()">✅ Complete Task</button>';
+ q('proofArea').classList.add('hidden');
+ q('taskModal').classList.remove('hidden');
+}
+function closeTask(){currentTask=null;q('taskModal').classList.add('hidden')}
+function showProofForm(){
+ if(!currentTask)return;
+ const types=Array.isArray(currentTask.proof_types)&&currentTask.proof_types.length?currentTask.proof_types:['text'];
+ q('proofTypes').innerHTML=types.map(x=>'<label class="proof-option"><input type="radio" name="proofType" value="'+esc(x)+'"> '+esc(x)+'</label>').join('');
+ q('proofArea').classList.remove('hidden');
+}
+async function submitCurrentTask(){
+ if(!currentTask){return}
+ const p=q('proofText').value.trim();
+ const link=q('proofLink').value.trim()||null;
+ const file=q('proofFile').files[0];
+ if(!p&&!link&&!file){alert('Proof দিন');return}
+ const selected=document.querySelector('input[name="proofType"]:checked')?.value||'text';
+ let proof=p;
+ if(file) proof=(proof?proof+'\n':'')+'File selected: '+file.name;
+ const r=await db.rpc('submit_task_with_proofs',{p_task_id:currentTask.id,p_proof:proof,p_proof_link:link,p_proof_files:[]});
+ if(r.error){alert(r.error.message);return}
+ alert('Submission পাঠানো হয়েছে। Admin review-এর পর reward যোগ হবে।');
+ closeTask();load();
+}
+async function submitTask(id){openTask(id)}
 async function checkin(){const r=await db.rpc('claim_daily_checkin');alert(r.error?r.error.message:'ডেইলি চেক-ইন সফল: +৳'+Number(r.data||0).toFixed(2));load()}
 async function spin(){const r=await db.rpc('claim_spin');alert(r.error?r.error.message:'স্পিন রিওয়ার্ড: ৳'+Number(r.data?.reward||0).toFixed(2));load()}
 async function savePayout(){const r=await db.rpc('save_payout_account',{p_method:q('pmethod').value,p_account_number:q('paccount').value.trim(),p_account_name:q('pname').value.trim(),p_bank_name:q('pbank').value.trim()});q('payoutStatus').textContent=r.error?r.error.message:'Payout account saved ✓'}
@@ -87,7 +131,7 @@ async function withdraw(amount){const r=await db.rpc('request_fixed_withdrawal',
 async function page(x){const pages=['tasks','wallet','withdraw','ref','checkin','spin','noti','profile','support'];if(x==='menu'){pages.forEach(k=>q(k).classList.add('hidden'));q('menu').classList.remove('hidden');q('pageNav').classList.add('hidden');return}q('menu').classList.add('hidden');pages.forEach(k=>q(k).classList.toggle('hidden',k!==x));q('pageNav').classList.remove('hidden');if(x==='tasks')await load();if(x==='withdraw')await loadPayout();if(x==='checkin')q('checkinStatus').textContent='আজকের bonus claim করতে বাটনে চাপুন';if(x==='spin')q('spinStatus').textContent='Spin Now চাপুন';if(x==='support'){const r=await db.from('support_settings').select('*').eq('id',1).maybeSingle();if(r.data){q('supportMsg').textContent=r.data.support_message||'যেকোনো সমস্যায় আমাদের সাথে যোগাযোগ করুন।';const u=r.data.telegram_channel_url||r.data.telegram_account||'';q('supportLink').href=u;q('supportLink').textContent=u?'Telegram Customer Support':'সাপোর্ট লিংক সেট করা হয়নি';}}}
 async function loadPayout(){const r=await db.from('user_payout_accounts').select('*').eq('user_id',user.id).maybeSingle();if(r.data){q('pmethod').value=r.data.method||'bkash';q('paccount').value=r.data.account_number||'';q('pname').value=r.data.account_name||'';q('pbank').value=r.data.bank_name||'';q('payoutStatus').textContent='Saved payout account loaded';}}
 async function logout(){await db.auth.signOut();location.reload()}
-Object.assign(window,{mode,submitTask,checkin,spin,withdraw,page,logout});
+Object.assign(window,{mode,submitTask,openTask,closeTask,showProofForm,submitCurrentTask,checkin,spin,withdraw,page,logout});
 window.addEventListener('error',e=>{console.error(e.error||e.message);if(q('msg'))say('অ্যাপের ত্রুটি: '+e.message)});
 document.addEventListener('DOMContentLoaded',async()=>{
  q('loginBtn').addEventListener('click',()=>doLogin(q('loginBtn')));
