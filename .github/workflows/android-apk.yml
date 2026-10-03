@@ -27,10 +27,15 @@ jobs:
           gradle-version: '8.7'
       - name: Build User and Admin APKs
         run: gradle assembleUserRelease assembleAdminRelease
-      - name: Rename APKs
+      - name: Locate and rename APKs
         run: |
-          cp app/build/outputs/apk/user/release/app-user-release.apk task-earn-user-v1.0.1.apk
-          cp app/build/outputs/apk/admin/release/app-admin-release.apk task-earn-admin-v1.0.1.apk
+          find app/build/outputs -type f -name "*.apk" -print
+          USER_APK=$(find app/build/outputs -type f -name "*.apk" | grep -E 'user|User' | head -n 1)
+          ADMIN_APK=$(find app/build/outputs -type f -name "*.apk" | grep -E 'admin|Admin' | head -n 1)
+          test -n "$USER_APK"
+          test -n "$ADMIN_APK"
+          cp "$USER_APK" task-earn-user-v1.0.1.apk
+          cp "$ADMIN_APK" task-earn-admin-v1.0.1.apk
       - name: Upload APKs
         uses: actions/upload-artifact@v4
         with:
