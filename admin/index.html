@@ -95,7 +95,7 @@ window.addEventListener('DOMContentLoaded', function(){
       <div><h2 style="margin:0">🔎 Task Proof Review</h2><div id="reviewMeta" class="muted"></div></div>
       <button class="btn gray" type="button" onclick="closeReviewModal()">✕ Close</button>
     </div>
-    <div id="reviewPhoto" class="review-photo-wrap"></div>
+    <div id="reviewTaskDetails" class="card" style="margin:12px 0;background:#f8fafc;border:1px solid #e2e8f0"><h3 style="margin:0 0 8px">📝 Task Details</h3><div id="reviewTaskInfo" class="muted">Task details loading…</div></div><div><h3 style="margin:12px 0 8px">📸 Proof Screenshot / Photo</h3><div id="reviewPhoto" class="review-photo-wrap"></div></div>
     <p id="reviewStatus" class="muted"></p>
     <div class="review-actions">
       <button id="reviewRejectBtn" class="btn red" type="button">✕ Reject</button>
@@ -180,16 +180,32 @@ async function loadSubmissions(){
 }
 async function openSubmissionReview(id){
  $('reviewModal').classList.remove('hidden');
- $('reviewMeta').textContent='Submission #'+id+' · প্রমাণের ছবি দেখা হচ্ছে…';
+ $('reviewMeta').textContent='Submission #'+id+' · Review details loading…';
+ $('reviewTaskInfo').innerHTML='Task details loading…';
  $('reviewPhoto').innerHTML='<div class="muted" style="color:#fff">প্রমাণের ছবি লোড হচ্ছে…</div>';
  $('reviewStatus').textContent='';
  $('reviewApproveBtn').disabled=true;
  $('reviewRejectBtn').disabled=true;
  $('reviewApproveBtn').onclick=()=>reviewSubmissionFromModal(id,true);
  $('reviewRejectBtn').onclick=()=>reviewSubmissionFromModal(id,false);
- const r=await db.from('task_submissions').select('id,task_id,user_id,proof_files,status,reward_points,reward_amount').eq('id',id).maybeSingle();
- if(r.error||!r.data){$('reviewPhoto').innerHTML='<div class="danger" style="background:#fff;padding:12px;border-radius:10px">Submission পাওয়া যায়নি: '+esc(r.error?.message||'Not found')+'</div>';return}
- $('reviewMeta').textContent='Submission #'+id+' · Task '+r.data.task_id+' · User '+r.data.user_id+' · '+Number(r.data.reward_points||r.data.reward_amount||0)+' Points';
+ const r=await db.from('task_submissions').select('id,task_id,user_id,proof_files,status,reward_points,reward_amount,created_at').eq('id',id).maybeSingle();
+ if(r.error||!r.data){$('reviewTaskInfo').innerHTML='<div class="danger">Submission পাওয়া যায়নি</div>';$('reviewPhoto').innerHTML='<div class="danger" style="background:#fff;padding:12px;border-radius:10px">Submission পাওয়া যায়নি: '+esc(r.error?.message||'Not found')+'</div>';return}
+ $('reviewMeta').textContent='Submission #'+id+' · Task '+r.data.task_id+' · User '+r.data.user_id;
+ const task=await db.from('tasks').select('id,title,description,reward,reward_points,target_url,task_type,proof_types,is_active').eq('id',r.data.task_id).maybeSingle();
+ if(task.error||!task.data){
+   $('reviewTaskInfo').innerHTML='<div class="danger">Task details পাওয়া যায়নি: '+esc(task.error?.message||'Task not found')+'</div>';
+ }else{
+   const t=task.data;
+   $('reviewTaskInfo').innerHTML='<div style="font-size:18px;font-weight:700;margin-bottom:6px">'+esc(t.title||'Untitled Task')+'</div>'
+    +'<div style="margin-bottom:8px;white-space:pre-wrap">'+esc(t.description||'কোনো description নেই')+'</div>'
+    +'<div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px">'
+    +'<div><b>Reward</b><br>৳'+Number(t.reward||0).toFixed(2)+'</div>'
+    +'<div><b>Points</b><br>'+Number(t.reward_points||0)+' Points</div>'
+    +'<div><b>Type</b><br>'+esc(t.task_type||'standard')+'</div>'
+    +'<div><b>Status</b><br>'+(t.is_active?'Active':'Inactive')+'</div></div>'
+    +(t.target_url?'<div style="margin-top:8px;word-break:break-all"><b>Task Link:</b> '+esc(t.target_url)+'</div>':'')
+    +'<div style="margin-top:8px"><b>Proof:</b> 📸 Screenshot / Photo</div>';
+ }
  if(r.data.status!=='pending'){
    $('reviewPhoto').innerHTML='<div class="muted" style="color:#fff">এই submission ইতিমধ্যে '+esc(r.data.status)+' হয়েছে।</div>';
    return;
