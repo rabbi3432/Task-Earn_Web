@@ -1,0 +1,32 @@
+plugins { id 'com.android.application' }
+
+android {
+    namespace 'com.taskeearn.app'
+    compileSdk 35
+
+    defaultConfig {
+        applicationId 'com.taskeearn.app'
+        minSdk 23
+        targetSdk 35
+        versionCode 1
+        versionName '1.0.0'
+    }
+
+    flavorDimensions 'edition'
+    productFlavors {
+        user {
+            dimension 'edition'
+            applicationIdSuffix '.user'
+            buildConfigField 'String', 'WEB_URL', '"https://rabbi3432.github.io/Task-Earn_Web/?app=user"'
+            resValue 'string', 'app_name', 'Task Earn'
+        }
+        admin {
+            dimension 'edition'
+            applicationIdSuffix '.admin'
+            buildConfigField 'String', 'WEB_URL', '"https://rabbi3432.github.io/Task-Earn_Web/admin/index.html?app=admin"'
+            resValue 'string', 'app_name', 'Task Earn Admin'
+        }
+    }
+
+    buildFeatures { buildConfig true }
+}
