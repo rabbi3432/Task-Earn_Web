@@ -89,6 +89,20 @@ window.addEventListener('DOMContentLoaded', function(){
 <button class="btn gray" onclick="loadReferralSettings()">Reload</button>
 <p id="refRewardStatus"></p></div></section>
 </main></div>
+<div id="reviewModal" class="review-modal hidden">
+  <div class="review-box">
+    <div class="review-head">
+      <div><h2 style="margin:0">🔎 Task Proof Review</h2><div id="reviewMeta" class="muted"></div></div>
+      <button class="btn gray" type="button" onclick="closeReviewModal()">✕ Close</button>
+    </div>
+    <div id="reviewPhoto" class="review-photo-wrap"></div>
+    <p id="reviewStatus" class="muted"></p>
+    <div class="review-actions">
+      <button id="reviewRejectBtn" class="btn red" type="button">✕ Reject</button>
+      <button id="reviewApproveBtn" class="btn green" type="button">✓ Approve</button>
+    </div>
+  </div>
+</div>
 <script>
 const SUPABASE_URL='https://gzamivqrrflogjjvhbej.supabase.co',KEY='sb_publishable_emPACnJ0LsZ1GjParqjJVA_wDO3faQg';
 const $=id=>document.getElementById(id);
@@ -226,7 +240,6 @@ window.showById=showById;
 window.newTask=newTask;
 window.closeTaskForm=closeTaskForm;
 window.saveTask=saveTask;
-window.loadTasks=loadTasks;
 window.editTask=editTask;
 window.deleteTask=deleteTask;
 
