@@ -72,6 +72,7 @@ q('bal').textContent='৳'+money.toFixed(2);q('walletBal').textContent=money.toF
 q('taskList').innerHTML=(t.data||[]).map((v,i)=>'<div class="offer-card"><div class="offer-img">'+['📲','🎮','📝','💳','📦','🎯'][i%6]+'</div><div><div class="earned">✓ '+Number(v.completed_count||0)+' Earned</div><div class="offer-title">'+esc(v.title)+'</div><div><span class="tag">🔥 Hot</span><span class="tag">🎁 Reward</span></div><div class="reward">🪙 '+Number(v.reward_points||v.reward||0).toLocaleString()+' <b>≈ ৳'+Number(v.reward||0).toFixed(2)+'</b></div><button class="earn-btn" onclick="openTask('+v.id+')">Earn</button></div></div>').join('')||'<div class="page-card">কোনো সক্রিয় অফার নেই</div>';
 q('notes').innerHTML=(n.data||[]).map(v=>'<div class="task"><b>'+esc(v.title)+'</b><div>'+esc(v.body)+'</div></div>').join('')||'কোনো নোটিফিকেশন নেই';
 q('myOfferList').innerHTML=(s.data||[]).map(v=>'<div class="task"><div class="row"><b>Task #'+v.task_id+'</b><span>'+esc(v.status||'pending')+'</span></div><div class="muted">'+new Date(v.created_at).toLocaleString()+'</div></div>').join('')||'<p>এখনও কোনো submitted offer নেই।';
+}
 function escProof(a){return Array.isArray(a)?a.join(', '):String(a||'text')}
 let currentTask=null;
 function esc(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
