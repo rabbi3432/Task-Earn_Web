@@ -143,23 +143,6 @@ async function safeLoadTasks(){
   }
 }
 window.loadTasks=safeLoadTasks;
-
-// Mobile-safe Task section actions.
-document.addEventListener('DOMContentLoaded',function(){
-  const taskSection=document.getElementById('tasks');
-  if(taskSection){
-    taskSection.addEventListener('click',function(e){
-      const b=e.target.closest('button');
-      if(!b)return;
-      const label=(b.textContent||'').trim();
-      if(label.includes('Update Tasks')) safeLoadTasks();
-      else if(label.includes('Add Task')) newTask();
-      else if(label.includes('Save Task')) saveTask();
-      else if(label.includes('Cancel')) closeTaskForm();
-    });
-  }
-});
-
 document.getElementById('loginBtn').addEventListener('click',doLogin);
 document.getElementById('pass').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin()});
 (async()=>{try{const client=await initDb();let s=await client.auth.getSession();if(s.data?.session){let a=await client.from('profiles').select('role,is_blocked').eq('id',s.data.session.user.id).maybeSingle();if(!a.error&&a.data?.role==='admin'&&a.data?.is_blocked!==true)openPanel();else await client.auth.signOut()}}catch(e){}})();
