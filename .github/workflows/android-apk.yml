@@ -29,12 +29,12 @@ jobs:
         run: gradle assembleUserRelease assembleAdminRelease
       - name: Rename APKs
         run: |
-          cp app/build/outputs/apk/user/release/app-user-release.apk task-earn-user-v1.0.0.apk
-          cp app/build/outputs/apk/admin/release/app-admin-release.apk task-earn-admin-v1.0.0.apk
+          cp app/build/outputs/apk/user/release/app-user-release.apk task-earn-user-v1.0.1.apk
+          cp app/build/outputs/apk/admin/release/app-admin-release.apk task-earn-admin-v1.0.1.apk
       - name: Upload APKs
         uses: actions/upload-artifact@v4
         with:
-          name: task-earn-apks-v1.0.0
+          name: task-earn-apks-v1.0.1
           path: |
-            task-earn-user-v1.0.0.apk
-            task-earn-admin-v1.0.0.apk
+            task-earn-user-v1.0.1.apk
+            task-earn-admin-v1.0.1.apk
