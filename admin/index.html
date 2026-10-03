@@ -202,7 +202,7 @@ async function safeLoadTasks(){
   }
 }
 window.loadTasks=safeLoadTasks;
-document.getElementById('loginBtn').addEventListener('click',doLogin);
+document.getElementById('loginBtn').addEventListener('click',function(e){e.preventDefault();if(typeof window.doLogin==='function')window.doLogin();});
 document.getElementById('pass').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin()});
 (async()=>{try{const client=await initDb();let s=await client.auth.getSession();if(s.data?.session){let a=await client.from('profiles').select('role,is_blocked').eq('id',s.data.session.user.id).maybeSingle();if(!a.error&&a.data?.role==='admin'&&a.data?.is_blocked!==true)openPanel();else await client.auth.signOut()}}catch(e){}})();
 </script></body></html>
