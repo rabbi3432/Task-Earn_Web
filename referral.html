@@ -1,0 +1,14 @@
+<!doctype html>
+<html lang="bn"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Task Earn Referral</title>
+<style>body{margin:0;background:#f1f1f1;font-family:Arial,'Hind Siliguri',sans-serif;color:#172018}.box{max-width:460px;margin:40px auto;padding:24px;background:#fff;border-radius:24px;box-shadow:0 8px 30px #0002;text-align:center}.logo{font-size:64px}.title{font-size:30px;font-weight:800;color:#08b83a}.ref{margin:18px 0;padding:14px;border:2px dashed #08b83a;border-radius:14px;font-weight:700}.btn{display:block;text-decoration:none;background:#08cf3f;color:#06150a;padding:15px;border-radius:28px;font-size:20px;font-weight:800;margin:14px 0}.secondary{background:#eef8f0;color:#159447}.small{color:#68736c;font-size:14px;line-height:1.6}</style></head>
+<body><div class="box"><div class="logo">🪙</div><div class="title">Task Earn</div><h2>🎁 Referral Invitation</h2><p>এই লিংকের মাধ্যমে Task Earn অ্যাপ ইনস্টল করুন এবং রেফারেলের মাধ্যমে যোগ দিন।</p><div class="ref">Referral Code: <span id="code">—</span></div>
+<a id="download" class="btn" href="https://gzamivqrrflogjjvhbej.supabase.co/storage/v1/object/public/Task%20Earn/task-earn-user.apk">📲 Task Earn APK Download</a>
+<a id="open" class="btn secondary" href="./?app=user">🌐 Open Task Earn Web App</a>
+<p class="small">APK ডাউনলোড হলে Android-এর Downloads/Files থেকে APK খুলে Install করুন। Android নিরাপত্তা সেটিংস চাইলে এই উৎস থেকে ইনস্টল করার অনুমতি দিন। ইনস্টল করার পর Register-এ referral code ব্যবহার করুন।</p></div>
+<script>
+const p=new URLSearchParams(location.search),code=p.get('ref')||'';
+document.getElementById('code').textContent=code||'Not provided';
+const open=document.getElementById('open');if(code)open.href='./?app=user&ref='+encodeURIComponent(code);
+const download=document.getElementById('download');download.addEventListener('click',()=>{if(!code)return});
+</script></body></html>
