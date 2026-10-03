@@ -18,6 +18,43 @@ window.runSupabaseDiagnostic=function(){
 </script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
+/* Independent login fallback: keeps Admin login working even if a later panel script has a runtime error. */
+window.__adminLoginFallback=async function(){
+  var raw=(document.getElementById('email')?.value||'').trim();
+  var pw=document.getElementById('pass')?.value||'';
+  var msg=document.getElementById('loginMsg'), btn=document.getElementById('loginBtn');
+  if(!raw||!pw){if(msg)msg.textContent='মোবাইল/Email এবং Password দিন';return}
+  if(btn){btn.disabled=true;btn.textContent='Connecting...'}
+  try{
+    var s=window.supabase;
+    if(!s||typeof s.createClient!=='function') throw new Error('Supabase SDK load হয়নি');
+    var key='sb_publishable_emPACnJ0LsZ1GjParqjJVA_wDO3faQg';
+    var client=s.createClient('https://gzamivqrrflogjjvhbej.supabase.co',key,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:false}});
+    var email=raw.includes('@')?raw:('phone_'+raw.replace(/\D/g,'')+'@taskearn.local');
+    if(msg)msg.textContent='Signing in…';
+    var res=await client.auth.signInWithPassword({email:email,password:pw});
+    if(res.error)throw new Error(res.error.message);
+    if(!res.data?.user)throw new Error('Login session পাওয়া যায়নি');
+    var check=await client.from('profiles').select('role,is_blocked').eq('id',res.data.user.id).maybeSingle();
+    if(check.error)throw new Error('Admin profile check failed: '+check.error.message);
+    if(!check.data)throw new Error('Admin profile পাওয়া যায়নি');
+    if(check.data.role!=='admin')throw new Error('এই account-এর Admin permission নেই');
+    if(check.data.is_blocked===true)throw new Error('এই Admin account ব্লক করা হয়েছে');
+    window.__adminFallbackClient=client;
+    document.getElementById('login').classList.add('hidden');
+    document.getElementById('panel').classList.remove('hidden');
+    if(typeof window.openPanel==='function' && typeof window.refreshAll==='function'){
+      try{await window.refreshAll()}catch(e){}
+    }
+  }catch(e){if(msg)msg.textContent='Login failed: '+(e?.message||e)}
+  finally{if(btn){btn.disabled=false;btn.textContent='Login'}}
+};
+window.addEventListener('DOMContentLoaded',function(){
+  var btn=document.getElementById('loginBtn');
+  if(btn){btn.onclick=function(e){e.preventDefault();if(typeof window.doLogin==='function')window.doLogin();else window.__adminLoginFallback();};}
+});
+</script>
+<script>
 window.addEventListener('DOMContentLoaded', function(){
   var btn=document.getElementById('loginBtn');
   if(btn){ btn.onclick=function(e){ e.preventDefault(); if(typeof window.doLogin==='function') window.doLogin(); else document.getElementById('loginMsg').textContent='Login system failed to initialize. Refresh করুন।'; }; }
