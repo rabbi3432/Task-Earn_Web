@@ -132,6 +132,7 @@ async function openTask(id){
 }
 function closeTask(){currentTask=null;q('taskModal').classList.add('hidden')}
 function showProofForm(){if(!currentTask)return;q('proofArea').classList.remove('hidden');}
+function safeUserMessage(msg){if(q('msg'))say(msg);else console.log(msg)}
 async function submitCurrentTask(){
  if(!currentTask)return;
  const file=q('proofFile').files[0];
@@ -141,10 +142,10 @@ async function submitCurrentTask(){
  const safe=file.name.replace(/[^A-Za-z0-9._-]/g,'_');
  const path=user.id+'/'+currentTask.id+'/'+Date.now()+'_'+safe;
  const up=await db.storage.from('task-proofs').upload(path,file,{upsert:false,contentType:file.type});
- if(up.error){alert('ছবি আপলোড হয়নি: '+up.error.message);return}
+ if(up.error){safeUserMessage('ছবি আপলোড হয়নি: '+up.error.message);return}
  const r=await db.rpc('submit_task_with_proofs',{p_task_id:currentTask.id,p_proof:'',p_proof_link:null,p_proof_files:[path]});
- if(r.error){await db.storage.from('task-proofs').remove([path]);alert(r.error.message);return}
- alert('Screenshot/Photo জমা হয়েছে। Admin review-এর পর reward যোগ হবে।');
+ if(r.error){await db.storage.from('task-proofs').remove([path]);safeUserMessage('কাজটি জমা দেওয়া যায়নি: '+r.error.message);return}
+ safeUserMessage('Screenshot/Photo জমা হয়েছে। Admin review-এর পর reward যোগ হবে।');
  closeTask();load();
 }
 async function submitTask(id){openTask(id)}
