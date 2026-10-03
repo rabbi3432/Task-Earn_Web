@@ -4,6 +4,8 @@ on:
   push:
     branches: [main]
     paths:
+      - 'index.html'
+      - 'admin/index.html'
       - 'app/**'
       - 'build.gradle'
       - 'settings.gradle'
