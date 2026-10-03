@@ -197,7 +197,7 @@ async function openSubmissionReview(id){
  const files=Array.isArray(r.data.proof_files)?r.data.proof_files:[];
  const images=[];
  for(const path of files){
-   if(/^https?:\\/\\//i.test(String(path))){images.push(String(path));continue}
+   if(/^https?:\/\//i.test(String(path))){images.push(String(path));continue}
    const u=await db.storage.from('task-proofs').createSignedUrl(String(path),3600);
    if(u.data?.signedUrl) images.push(u.data.signedUrl);
  }
