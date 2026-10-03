@@ -12,7 +12,7 @@
 .offer-img{width:44px;height:44px;font-size:19px}.offer-title{font-size:11px;line-height:1.1;margin:0 0 1px}.earned{font-size:7px}.reward{font-size:9px;margin-top:1px}.tag{font-size:5.5px;padding:1px 3px}.earn-btn{padding:3px 9px;font-size:9px;border-radius:13px}
 }
 </style></head><body><div class="wrap"><section id="auth" class="card"><div class="brand"><div>🪙</div><h1>TakaEarn</h1><p>অনলাইনে আয় করুন সহজে</p></div><div class="tabs"><button class="btn" onclick="mode(1)">লগইন</button><button class="btn gold" onclick="mode(0)">রেজিস্টার</button></div><form id="loginPanel" onsubmit="event.preventDefault();doLogin(document.getElementById('loginBtn'))"><input id="lp" class="input" type="tel" inputmode="numeric" autocomplete="username" placeholder="মোবাইল নাম্বার"><input id="lpass" class="input" type="password" autocomplete="current-password" placeholder="পাসওয়ার্ড"><button type="submit" class="btn" id="loginBtn">লগইন করুন</button></form><div id="reg" class="hidden"><input id="rn" class="input" placeholder="আপনার নাম"><input id="rp" class="input" placeholder="মোবাইল নাম্বার"><input id="rpass" class="input" type="password" placeholder="পাসওয়ার্ড"><input id="rr" class="input" placeholder="রেফার কোড (ঐচ্ছিক)"><button type="button" class="btn" id="registerBtn" onclick="doRegister(this)">রেজিস্টার করুন</button></div><p id="msg" class="muted"></p></section><section id="app" class="hidden">
-<div class="app-header"><div class="header-row"><div class="balance"><span class="coin">🪙</span><span class="balance-points" id="bal">0</span><span style="font-size:12px;color:#777">Points</span></div><div class="header-actions"><span>💵</span><button class="profile-btn" onclick="page('profile')">◯</button></div></div>
+<div class="app-header"><div class="header-row"><div class="balance"><span class="coin">🪙</span><span class="balance-points" id="bal">0</span><span style="font-size:12px;color:#777">Points</span><span class="balance-money" id="balMoney">৳0.00</span></div><div class="header-actions"><span>💵</span><button class="profile-btn" onclick="page('profile')">◯</button></div></div>
 <div class="progress"><div class="progress-line"><i id="progressFill"></i></div><div class="milestones"><div class="milestone"><small>+10000</small><div class="bubble">🪙</div></div><div class="milestone"><small>+20000</small><div class="bubble">🪙</div></div><div class="milestone"><small>+30000</small><div class="bubble">🪙</div></div><div class="milestone"><small>+40000</small><div class="bubble">🪙</div></div><div class="milestone"><small>Cash</small><div class="bubble">💵</div></div></div></div></div>
 <div id="offers" class="section-page"><div class="filters"><div class="filter-wrap"><button class="filter" id="typeFilterBtn" onclick="toggleFilterMenu('typeFilterMenu')">⌘ All Types　⌄</button><div id="typeFilterMenu" class="filter-menu"></div></div><div class="filter-wrap"><button class="filter" id="tagFilterBtn" onclick="toggleFilterMenu('tagFilterMenu')">🏷 All Tags　⌄</button><div id="tagFilterMenu" class="filter-menu"></div></div></div><div class="offers-page"><div id="taskList"></div></div></div>
 <div id="myoffers" class="section-page section-hidden"><div class="page-card"><div class="header-row"><h2>My Offers</h2><button class="btn" onclick="load()">↻</button></div><div id="myOfferList"></div></div></div>
@@ -76,6 +76,7 @@ async function enter(){
 }
 async function load(){
  if(!user)return;
+ try{
  const [p,t,r,n,s,rs]=await Promise.all([
  db.from('profiles').select('*').eq('id',user.id).maybeSingle(),
  db.from('tasks').select('*').eq('is_active',true).order('created_at',{ascending:false}),
@@ -95,6 +96,11 @@ q('refReward').textContent=refSettings?.enabled ? Number(refSettings.reward_poin
 renderTasks();
 q('notes').innerHTML=(n.data||[]).map(v=>'<div class="task"><b>'+esc(v.title)+'</b><div>'+esc(v.body)+'</div></div>').join('')||'কোনো নোটিফিকেশন নেই';
 q('myOfferList').innerHTML=(s.data||[]).map((v,i)=>{const t=allTasks.find(x=>String(x.id)===String(v.task_id));const raw=String(v.status||'processing').toLowerCase();const ok=['approved','completed','success','successful','paid'].includes(raw);const bad=['rejected','failed','declined'].includes(raw);const label=ok?'✓ Success':bad?'✕ Rejected':'⏳ Processing';const cls=ok?'status-success':bad?'status-rejected':'status-processing';return '<div class="my-task-card"><div class="my-task-icon">'+['📲','🎮','📝','💳','📦','🎯'][i%6]+'</div><div class="my-task-title">'+esc(t?.title||('Task #'+v.task_id))+'</div><div class="my-task-date">'+new Date(v.created_at).toLocaleString()+'</div><span class="status-pill '+cls+'">'+label+'</span></div>'}).join('')||'<p>এখনও কোনো submitted offer নেই।';
+ }catch(e){
+  console.error('LOAD_ERROR',e);
+  allTasks=[];
+  if(q('taskList'))q('taskList').innerHTML='<div class="page-card">❌ টাস্ক লোড করতে সমস্যা হয়েছে।<br><small>'+esc(e?.message||'Unknown error')+'</small><br><button class="btn" onclick="load()">আবার চেষ্টা করুন</button></div>';
+ }
 }
 function taskType(v){return String(v.task_type||v.type||'Other').trim()||'Other'}
 function taskTags(v){let x=v.tags||v.tag||[];if(typeof x==='string'){try{x=JSON.parse(x)}catch(e){x=x.split(',')}}return Array.isArray(x)?x.map(String).map(s=>s.trim()).filter(Boolean):[]}
@@ -120,7 +126,7 @@ async function openTask(id){
  if(r.error||!r.data){alert(r.error?.message||'Task পাওয়া যায়নি');return}
  currentTask=r.data;
  q('taskModalTitle').textContent=currentTask.title||'Task';
- q('taskModalBody').innerHTML='<p>'+esc(currentTask.description||'এই টাস্কটি সম্পন্ন করুন।')+'</p><p><b>Reward:</b> ৳'+Number(currentTask.reward||0).toFixed(2)+'</p><p class="muted"><b>Required proof:</b> '+escProof(currentTask.proof_types||['text'])+'</p><button class="btn" onclick="showProofForm()">✅ Complete Task</button>';
+ q('taskModalBody').innerHTML='<p>'+esc(currentTask.description||'এই টাস্কটি সম্পন্ন করুন।')+'</p><p><b>Reward:</b> 🪙 '+Number(currentTask.reward_points||currentTask.reward||0).toLocaleString()+' Points</p><p class="muted"><b>Required proof:</b> '+escProof(currentTask.proof_types||['text'])+'</p><button class="btn" onclick="showProofForm()">✅ Complete Task</button>';
  q('proofArea').classList.add('hidden');
  q('taskModal').classList.remove('hidden');
 }
