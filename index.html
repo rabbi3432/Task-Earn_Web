@@ -40,8 +40,9 @@ function say(x){q('msg').textContent=x||''}
 function busy(btn,on){if(btn){btn.disabled=on;btn.dataset.old=btn.dataset.old||btn.textContent;btn.textContent=on?'কাজ হচ্ছে...':btn.dataset.old}}
 async function doLogin(btn){
  if(!btn)btn=q('loginBtn');
- const p=q('lp')?.value.trim()||'',pw=q('lpass')?.value||'';
- if(!p||!pw){say('⚠️ মোবাইল নাম্বার ও পাসওয়ার্ড দিন');return}
+ const pRaw=q('lp')?.value.trim()||'',pw=q('lpass')?.value||'';
+ const p=normalizeBDPhone(pRaw);
+ if(!p||!pw){say(!p?'⚠️ সঠিক ১১ সংখ্যার বাংলাদেশি মোবাইল নম্বর দিন (01XXXXXXXXX)।':'⚠️ পাসওয়ার্ড দিন');return}
  if(!window.supabase){say('❌ Supabase library লোড হয়নি। Internet চালু করে আবার চেষ্টা করুন।');return}
  busy(btn,true);say('🔄 লগইন হচ্ছে...');
  try{
@@ -57,11 +58,22 @@ async function doLogin(btn){
   say('❌ লগইনে সমস্যা: '+(e?.message||'Unknown error'));
  }finally{busy(btn,false)}
 }
+function normalizeBDPhone(value){
+ const raw=String(value||'').replace(/[\\s-]/g,'');
+ if(/^\\+8801[3-9]\\d{8}$/.test(raw)) return '0'+raw.slice(4);
+ if(/^8801[3-9]\\d{8}$/.test(raw)) return '0'+raw.slice(3);
+ if(/^01[3-9]\\d{8}$/.test(raw)) return raw;
+ return '';
+}
 async function doRegister(btn){
  busy(btn,true);
  try{
-  const n=q('rn').value.trim(),p=q('rp').value.trim(),pw=q('rpass').value;
-  if(!n||!p||pw.length<6){say('নাম, নাম্বার ও ৬+ অক্ষরের পাসওয়ার্ড দিন');return}
+  const n=q('rn').value.trim(),pRaw=q('rp').value.trim(),pw=q('rpass').value;
+  const p=normalizeBDPhone(pRaw);
+  if(!n||!p||pw.length<6){
+   say(!p?'⚠️ সঠিক ১১ সংখ্যার বাংলাদেশি মোবাইল নম্বর দিন (01XXXXXXXXX)।': 'নাম ও ৬+ অক্ষরের পাসওয়ার্ড দিন');
+   return
+  }
   say('অ্যাকাউন্ট তৈরি হচ্ছে...');
   const {data,error}=await db.auth.signUp({email:emailForPhone(p),password:pw,options:{data:{phone:p,full_name:n,referral_code_input:q('rr').value.trim()}}});
   if(error){say('রেজিস্ট্রেশন ব্যর্থ: '+error.message);return}
