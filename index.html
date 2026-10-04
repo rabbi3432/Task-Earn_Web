@@ -289,7 +289,24 @@ let selectedCash=200;function selectCash(el,amount){document.querySelectorAll('.
  finally{if(btn){btn.disabled=false;btn.textContent='History ›'}}
 }
 window.showWithdrawHistory=showWithdrawHistory;
-function copyCode(){navigator.clipboard?.writeText(q('code').textContent);alert('Referral code copied')}function shareRef(){const code=q('code').textContent;const url=new URL('https://rabbi3432.github.io/Task-Earn/');if(code&&code!=='—')url.searchParams.set('ref',code);const text='Task Earn এ যোগ দিন। আমার referral link: '+url.href;if(navigator.share){navigator.share({title:'Task Earn Referral',text,url:url.href}).catch(()=>{})}else{navigator.clipboard?.writeText(url.href);alert('Referral link copied')}}async function logout(){try{await db.auth.signOut({scope:'local'});}finally{user=null;location.reload()}}
+function copyCode(){navigator.clipboard?.writeText(q('code').textContent)}
+async function shareRef(){
+ const code=q('code').textContent;
+ const url=new URL('https://rabbi3432.github.io/Task-Earn/');
+ if(code&&code!=='—')url.searchParams.set('ref',code);
+ const text='Task Earn এ যোগ দিন। আমার referral link: '+url.href;
+ try{
+  if(navigator.share){
+   await navigator.share({title:'Task Earn Referral',text,url:url.href});
+   return;
+  }
+ }catch(e){
+  if(e?.name==='AbortError')return;
+ }
+ // Android WebView fallback: open the native Android share chooser without any alert/copy notice.
+ const intent='intent://share/#Intent;action=android.intent.action.SEND;type=text/plain;S.android.intent.extra.TEXT='+encodeURIComponent(text)+';S.android.intent.extra.TITLE='+encodeURIComponent('Task Earn Referral')+';end';
+ try{window.location.href=intent}catch(e){}
+}async function logout(){try{await db.auth.signOut({scope:'local'});}finally{user=null;location.reload()}}
 Object.assign(window,{mode,submitTask,openTask,closeTask,showProofForm,submitCurrentTask,checkin,spin,withdraw,page,logout,copyCode,shareRef,selectCash,doCashout,showWithdrawHistory,toggleFilterMenu,setTypeFilter,setTagFilter});
 window.addEventListener('error',e=>{console.error(e.error||e.message);if(q('msg'))say('অ্যাপের ত্রুটি: '+e.message)});
 
