@@ -63,7 +63,15 @@ window.addEventListener('DOMContentLoaded', function(){
 <style>
 *{box-sizing:border-box}body{margin:0;font-family:Arial,'Noto Sans Bengali',sans-serif;background:#f4f7fb;color:#172033}.app{max-width:1100px;margin:auto}.top{background:#172554;color:white;padding:18px;position:sticky;top:0;z-index:5}.top h1{margin:0 0 4px}.muted{color:#6b7280}.top .muted{color:#cbd5e1}.nav{display:flex;gap:8px;overflow:auto;padding:10px;background:#fff;position:sticky;top:77px;z-index:4;border-bottom:1px solid #e5e7eb}.nav button{white-space:nowrap;border:0;background:#eef2ff;padding:10px 13px;border-radius:10px}.nav button.active{background:#172554;color:#fff}.page{padding:14px}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px}.card{background:#fff;border-radius:16px;padding:16px;box-shadow:0 3px 14px #0000000b;margin-bottom:12px}.stat b{font-size:26px}.btn{border:0;border-radius:10px;padding:10px 14px;background:#2563eb;color:white;font-weight:700}.btn.green{background:#16a34a}.btn.red{background:#dc2626}.btn.gray{background:#64748b}.btn.gold{background:#d97706}.input,.select{width:100%;padding:11px;border:1px solid #d7dce5;border-radius:10px;margin:5px 0;font:inherit}.row{display:flex;gap:8px;align-items:center;justify-content:space-between}.table{overflow:auto}.table table{width:100%;border-collapse:collapse;min-width:700px}.table th,.table td{padding:10px;border-bottom:1px solid #edf0f4;text-align:left}.pill{display:inline-block;padding:4px 8px;border-radius:999px;background:#e0f2fe;font-size:12px}.hidden{display:none}.login{max-width:430px;margin:12vh auto;padding:20px}.danger{color:#b91c1c}.offer{border:1px solid #e5e7eb;border-radius:12px;padding:12px;margin:8px 0}
  .proof-preview{margin:12px 0;padding:10px;background:#f7faf8;border:1px solid #dfeae3;border-radius:14px}.proof-images{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0}.proof-images img{width:150px;height:150px;object-fit:cover;border-radius:10px;border:2px solid #fff;box-shadow:0 2px 8px #0002;cursor:pointer} .proof-images img:active{transform:scale(.98)}.review-modal.hidden{display:none!important}.review-modal{position:fixed;inset:0;background:#0009;z-index:100;display:flex;align-items:center;justify-content:center;padding:14px}.review-box{background:#fff;width:min(760px,100%);max-height:92vh;overflow:auto;border-radius:18px;padding:16px;box-shadow:0 10px 40px #0006}.review-head{display:flex;align-items:center;justify-content:space-between;gap:10px}.review-photo-wrap{margin:12px 0;background:#111;border-radius:14px;min-height:220px;display:flex;align-items:center;justify-content:center;overflow:hidden}.review-photo-wrap img{display:block;max-width:100%;max-height:60vh;object-fit:contain}.review-actions{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap;margin-top:14px}
-</style></head><body><div id="login" class="card login"><h1>🛡️ Task Earn Admin</h1><p class="muted">শুধু Admin account দিয়ে প্রবেশ করুন</p><p style="font-size:12px;color:#2563eb">Admin Panel v2 • Login system updated</p><input id="email" class="input" placeholder="Admin মোবাইল / Email"><input id="pass" class="input" type="password" placeholder="Password"><button id="loginBtn" class="btn" style="width:100%" type="button">Login</button><p id="loginMsg" class="danger"></p><p id="serverStatus" style="font-size:12px;color:#64748b">Supabase connection checking…</p><button class="btn gray" style="font-size:12px;padding:7px 10px" type="button" onclick="runSupabaseDiagnostic()">↻ Check Supabase again</button></div>
+</style><style>
+#pullRefreshIndicator{position:fixed;top:0;left:0;right:0;z-index:9999;height:0;overflow:hidden;background:#172a63;color:#fff;text-align:center;font-size:14px;transition:height .18s,opacity .18s;opacity:0}
+#pullRefreshIndicator .pri-inner{height:48px;display:flex;align-items:center;justify-content:center;gap:8px}
+#pullRefreshIndicator.ready{height:48px;opacity:1}
+#pullRefreshIndicator.refreshing{height:52px;opacity:1}
+#pullRefreshIndicator .pri-icon{font-size:20px;display:inline-block}
+#pullRefreshIndicator.refreshing .pri-icon{animation:priSpin .8s linear infinite}
+@keyframes priSpin{to{transform:rotate(360deg)}}
+</style></head><body><div id="pullRefreshIndicator"><div class="pri-inner"><span class="pri-icon">↻</span><span id="pullRefreshText">নিচে টেনে Refresh করুন</span></div></div><div id="login" class="card login"><h1>🛡️ Task Earn Admin</h1><p class="muted">শুধু Admin account দিয়ে প্রবেশ করুন</p><p style="font-size:12px;color:#2563eb">Admin Panel v2 • Login system updated</p><input id="email" class="input" placeholder="Admin মোবাইল / Email"><input id="pass" class="input" type="password" placeholder="Password"><button id="loginBtn" class="btn" style="width:100%" type="button">Login</button><p id="loginMsg" class="danger"></p><p id="serverStatus" style="font-size:12px;color:#64748b">Supabase connection checking…</p><button class="btn gray" style="font-size:12px;padding:7px 10px" type="button" onclick="runSupabaseDiagnostic()">↻ Check Supabase again</button></div>
 <div id="panel" class="hidden"><div class="top"><div class="row"><div><h1>Task Earn — Admin</h1><div class="muted">পূর্ণ কন্ট্রোল প্যানেল</div></div><button class="btn red" onclick="logout()">Logout</button></div></div>
 <div class="nav"><button onclick="show('dashboard',this)" class="active">📊 Dashboard</button><button onclick="show('users',this)">👤 Users</button><button onclick="show('networks',this)">🌐 Income Networks</button><button onclick="show('offers',this)">🎁 Imported Offers</button><button onclick="show('tasks',this)">📝 Tasks</button><button onclick="show('submissions',this)">📥 Submissions</button><button onclick="show('withdrawals',this)">💸 Withdrawals</button><button onclick="show('support',this)">🎧 Support</button><button onclick="show('settings',this)">⚙️ System Settings</button></div>
 <main class="page">
@@ -155,6 +163,46 @@ function openUserEdit(id){const u=(window._adminUsers||[]).find(x=>x.id===id);if
 function closeUserEdit(){$('userEditModal').classList.add('hidden')}
 async function saveUserEdit(){const modal=$('userEditModal'),id=modal.dataset.id;const name=$('ueName').value.trim(),phone=normPhone($('uePhone').value),points=Number($('uePoints').value),money=Number($('ueMoney').value),blocked=$('ueBlocked').checked,verify=$('ueVerify').value;if(!id||!name||!/^(01[3-9]\\d{8})$/.test(phone)||!Number.isFinite(points)||!Number.isFinite(money)||points<0||money<0){$('ueMsg').textContent='সঠিক নাম, ১১ সংখ্যার মোবাইল নম্বর এবং ০ বা তার বেশি balance দিন।';return}const {error}=await db.rpc('admin_update_user_profile',{p_user_id:id,p_full_name:name,p_phone:phone,p_points_balance:points,p_money_balance:money,p_is_blocked:blocked,p_verification_status:verify});if(error){$('ueMsg').textContent='সংরক্ষণ ব্যর্থ: '+error.message;return}closeUserEdit();await loadUsers()}
 async function loadUsers(){const qv=($('userSearch')?.value||'').trim();let query=db.from('profiles').select('*').order('created_at',{ascending:false});if(qv){const p=normPhone(qv);query=query.or('phone.ilike.%'+p+'%,full_name.ilike.%'+qv+'%')}const rr=await query;const box=$('userList');if(!box)return;if(rr.error){box.innerHTML='<p class="danger">User লোড করতে সমস্যা: '+esc(rr.error.message)+'</p>';return}const rows=rr.data||[];window._adminUsers=rows;box.innerHTML=rows.map(u=>'<div class="offer"><div class="row"><div><b>'+esc(u.full_name||'User')+'</b><div class="muted">'+esc(u.phone||'No phone')+'</div></div><span class="pill">'+esc(u.role||'user')+'</span></div><div class="muted" style="margin-top:8px">Status: '+(u.is_blocked?'Blocked':'Active')+' · ~ '+Number(u.points_balance||0).toLocaleString()+' · ৳'+Number(u.money_balance||0).toFixed(2)+'</div><div class="muted" style="font-size:12px;margin-top:5px">ID: '+esc(u.id)+'</div><button class="btn" style="margin-top:10px" onclick="openUserEdit(\''+u.id+'\')">✏️ Edit Account</button></div>').join('')||'<p class="muted">কোনো User পাওয়া যায়নি।</p>'}
+(function(){
+ let startY=0,startX=0,pulling=false,refreshing=false;
+ const threshold=75;
+ function indicator(text,state){
+  const el=document.getElementById('pullRefreshIndicator'),tx=document.getElementById('pullRefreshText');
+  if(!el)return;
+  if(state==='hide'){el.className='';return}
+  el.className=state||''; if(tx)tx.textContent=text;
+ }
+ function atTop(){return (window.scrollY||document.documentElement.scrollTop||0)<=2}
+ document.addEventListener('touchstart',e=>{
+  if(refreshing||!atTop()||!e.touches[0])return;
+  startY=e.touches[0].clientY;startX=e.touches[0].clientX;pulling=true;
+ },{passive:true});
+ document.addEventListener('touchmove',e=>{
+  if(!pulling||refreshing||!e.touches[0])return;
+  const dy=e.touches[0].clientY-startY,dx=e.touches[0].clientX-startX;
+  if(dy<=0||Math.abs(dx)>Math.abs(dy)){pulling=false;indicator('', 'hide');return}
+  if(dy>10){e.preventDefault();indicator(dy>=threshold?'ছেড়ে দিন — Refresh হবে':'নিচে টেনে Refresh করুন','ready')}
+ },{passive:false});
+ document.addEventListener('touchend',async()=>{
+  if(!pulling||refreshing)return;
+  const currentY=window.__pullLastY||0; pulling=false;
+  if(currentY>=threshold){
+   refreshing=true;indicator('Refresh হচ্ছে…','refreshing');
+   try{
+    if(typeof window.refreshAll==='function') await window.refreshAll();
+    const active=document.querySelector('.nav button.active');
+    const id=active?.dataset?.section;
+    if(id&&id!=='dashboard'&&typeof window.show==='function') await window.show(id,active);
+   }finally{
+    setTimeout(()=>{refreshing=false;indicator('', 'hide')},350);
+   }
+  }else indicator('', 'hide');
+ });
+ document.addEventListener('touchmove',e=>{
+  if(pulling&&e.touches[0])window.__pullLastY=Math.max(0,e.touches[0].clientY-startY);
+ },{passive:true});
+ document.addEventListener('touchstart',()=>{window.__pullLastY=0},{passive:true});
+})();
 async function refreshAll(){try{const u=await db.from('profiles').select('id',{count:'exact',head:true});$('usersCount').textContent=u.error?'ERR':(u.count??0);const t=await db.from('tasks').select('id',{count:'exact',head:true}).eq('is_active',true);$('tasksCount').textContent=t.error?'ERR':(t.count??0);const n=await db.from('earning_networks').select('*').order('created_at',{ascending:false});if(n.error){$('netCount').textContent='ERR';$('networkList').innerHTML='<p class="danger">Network load: '+esc(n.error.message)+'</p>'}else{networks=n.data||[];$('netCount').textContent=networks.length;renderNetworks()}const o=await db.from('network_offers').select('id',{count:'exact',head:true});$('offerCount').textContent=o.error?'ERR':(o.count??0);if(u.error||t.error||o.error)console.error('DASHBOARD_QUERY_ERROR',u.error,t.error,o.error);return true}catch(e){console.error('REFRESH_ALL_ERROR',e);return false}}
 function renderNetworks(){$('networkList').innerHTML=networks.map(n=>'<div class="offer"><div class="row"><div><b>'+esc(n.name)+'</b> <span class="pill">'+esc(n.provider)+'</span><div class="muted">'+esc(n.publisher_id||'No ID')+' · '+esc((n.settings?.country_mode||n.country||'ALL'))+' · '+esc((n.settings?.device_mode||'ALL'))+' · limit '+esc(n.settings?.offer_limit||5000)+'</div></div><div><span class="pill">'+esc(n.status)+'</span> <button class="btn" onclick="editNetwork('+n.id+')">Edit</button> <button class="btn red" onclick="deleteNetwork('+n.id+')">Delete</button></div></div></div>').join('')||'<p class="muted">কোনো earning network যোগ করা হয়নি।</p>'}
 function newNetwork(){$('networkForm').classList.remove('hidden');['nid','nname','nprovider','npub','nkey','nsecret','nendpoint','nreward','nmargin'].forEach(i=>$(i).value='');$('ncountry').value='BD';$('ndevice').value='ALL';$('nofferlimit').value='5000';$('nautoimport').value='true';$('nautoupdate').value='true';$('nconversion').value='true';$('nreversal').value='true';$('nstatus').value='active';if(!$('nname').value)$('nname').value='CPAlead';if(!$('nprovider').value)$('nprovider').value='cpalead';if(!$('npub').value)$('npub').value='3363955';if(!$('nendpoint').value)$('nendpoint').value='https://www.cpalead.com/api/offers'}
