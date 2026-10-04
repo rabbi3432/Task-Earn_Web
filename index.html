@@ -124,6 +124,13 @@ function renderTasks(){
 document.addEventListener('click',e=>{if(!e.target.closest('.filter-wrap'))document.querySelectorAll('.filter-menu').forEach(m=>m.classList.remove('open'))});
 function escProof(a){return Array.isArray(a)?a.join(', '):String(a||'text')}
 let currentTask=null;
+function isNetworkTask(t){return ['cpalead','network_offer'].includes(String(t?.provider||'').toLowerCase())}
+function getTaskWorkLink(t){
+ const link=t?.task_link||t?.target_url||t?.link||t?.url||'';
+ if(!link)return '';
+ if(!isNetworkTask(t)||!user?.id)return link;
+ try{const u=new URL(link,location.href);u.searchParams.set('subid',user.id);u.searchParams.set('subid2',String(t.id));return u.toString()}catch(e){return link+(link.includes('?')?'&':'?')+'subid='+encodeURIComponent(user.id)+'&subid2='+encodeURIComponent(String(t.id))}
+}
 function esc(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
 async function openTask(id){
  const r=await db.from('tasks').select('*').eq('id',id).eq('is_active',true).maybeSingle();
@@ -136,16 +143,18 @@ async function openTask(id){
  const money=(pts/pointsPerBDT).toFixed(2);
  q('taskModalBody').innerHTML='<div class="work-hero"><div class="work-title">'+esc(currentTask.title||'Task')+'</div><div class="work-reward">🪙 '+pts.toLocaleString()+' <span class="point-mark">~</span> ≈ ৳'+money+'</div></div><p>'+esc(currentTask.description||'এই টাস্কটি সম্পন্ন করুন।')+'</p><p><b>Task Type:</b> '+esc(taskType(currentTask))+'</p><p class="muted"><b>Required proof:</b> 📸 Screenshot / Photo</p>';
  q('proofArea').classList.add('hidden');
+ const network=isNetworkTask(currentTask);
  q('completeTaskBtn').disabled=!taskStarted;
  q('earnTaskBtn').classList.remove('hidden');
- q('completeTaskBtn').classList.remove('hidden');
+ q('completeTaskBtn').classList.toggle('hidden',network);
+ q('taskStartHint').className=network?'complete-hint':'';
  q('earnTaskBtn').textContent=taskStarted?'➡️ Continue':'🚀 Earn / Start Task';
  q('taskStartHint').textContent=taskStarted?'✅ Task চালু হয়েছিল। Continue দিয়ে আবার কাজের পেজ খুলতে পারবেন, অথবা কাজ শেষ হলে Complete চাপুন।':'প্রথমে Earn / Start Task চাপুন। তারপর আলাদা Task page-এ Continue চাপুন।';
  q('taskModal').classList.remove('hidden');
 }
 function startTaskWork(){
  if(!currentTask)return;
- const link=currentTask.task_link||currentTask.target_url||currentTask.link||currentTask.url||'';
+ const link=getTaskWorkLink(currentTask);
  if(!link){safeUserMessage('এই Task-এর কাজের Link দেওয়া নেই।');return}
  q('taskModalTitle').textContent='🚀 Continue Task';
  q('taskModalBody').innerHTML='<div class="work-page"><div class="work-hero"><div class="work-title">'+esc(currentTask.title||'Task')+'</div><div class="work-reward">🪙 '+Number(currentTask.reward_points||currentTask.reward||0).toLocaleString()+' <span class="point-mark">~</span> ≈ ৳'+(Number(currentTask.reward_points||currentTask.reward||0)/pointsPerBDT).toFixed(2)+'</div></div><p>'+esc(currentTask.description||'এই টাস্কটি সম্পন্ন করুন।')+'</p><p class="muted">Continue চাপলে Task-এর কাজের পেজ খুলবে। কাজ শেষ হলে Back করে আবার Task Earn-এ ফিরে আসুন।</p><button type="button" class="btn" style="width:100%" onclick="continueTaskWork()">➡️ Continue</button></div>';
