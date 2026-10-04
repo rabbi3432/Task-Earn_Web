@@ -24,7 +24,7 @@
 const SUPABASE_URL='https://gzamivqrrflogjjvhbej.supabase.co';
 const SUPABASE_KEY='sb_publishable_emPACnJ0LsZ1GjParqjJVA_wDO3faQg';
 const db=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
-let user=null; let allTasks=[]; let activeType="all"; let activeTag="all";
+let user=null; let allTasks=[]; let submittedTaskIds=new Set(); let activeType="all"; let activeTag="all";
 const q=id=>document.getElementById(id);
 const emailForPhone=p=>'phone_'+String(p).replace(/\D/g,'')+'@taskearn.local';
 function mode(isLogin){q('loginPanel').classList.toggle('hidden',!isLogin);q('reg').classList.toggle('hidden',isLogin);say('')}
@@ -93,6 +93,7 @@ const ps=await db.from('point_settings').select('points_per_bdt').eq('id',1).may
 const rate=Number(ps.data?.points_per_bdt||20000);
 q('balMoney').textContent='৳'+(coins/rate).toFixed(2);
 q('refReward').textContent=refSettings?.enabled ? Number(refSettings.reward_points||0).toLocaleString()+' Points' : 'বন্ধ';q('profileName').textContent=x?.full_name||'User';q('profilePhone').textContent=x?.phone||'';q('code').textContent=x?.referral_code||'—';q('refs').textContent=(r.data||[]).length;q('progressFill').style.width=Math.min(100,Math.max(3,(coins/400000)*100))+'%';
+submittedTaskIds=new Set((s.data||[]).filter(v=>!['rejected','failed','declined'].includes(String(v.status||'').toLowerCase())).map(v=>String(v.task_id)));
 renderTasks();
 q('notes').innerHTML=(n.data||[]).map(v=>'<div class="task"><b>'+esc(v.title)+'</b><div>'+esc(v.body)+'</div></div>').join('')||'কোনো নোটিফিকেশন নেই';
 q('myOfferList').innerHTML=(s.data||[]).map((v,i)=>{const t=allTasks.find(x=>String(x.id)===String(v.task_id));const raw=String(v.status||'processing').toLowerCase();const ok=['approved','completed','success','successful','paid'].includes(raw);const bad=['rejected','failed','declined'].includes(raw);const label=ok?'✓ Success':bad?'✕ Rejected':'⏳ Processing';const cls=ok?'status-success':bad?'status-rejected':'status-processing';return '<div class="my-task-card"><div class="my-task-icon">'+['📲','🎮','📝','💳','📦','🎯'][i%6]+'</div><div class="my-task-title">'+esc(t?.title||('Task #'+v.task_id))+'</div><div class="my-task-date">'+new Date(v.created_at).toLocaleString()+'</div><span class="status-pill '+cls+'">'+label+'</span></div>'}).join('')||'<p>এখনও কোনো submitted offer নেই।';
@@ -114,7 +115,7 @@ function buildFilterMenus(tasks){
 function setTypeFilter(v){activeType=v;q('typeFilterBtn').textContent='⌘ '+(v==='all'?'All Types':v)+'　⌄';q('typeFilterMenu').classList.remove('open');renderTasks()}
 function setTagFilter(v){activeTag=v;q('tagFilterBtn').textContent='🏷 '+(v==='all'?'All Tags':v)+'　⌄';q('tagFilterMenu').classList.remove('open');renderTasks()}
 function renderTasks(){
- const list=allTasks.filter(v=>(activeType==='all'||taskType(v)===activeType)&&(activeTag==='all'||taskTags(v).includes(activeTag)));
+ const list=allTasks.filter(v=>!submittedTaskIds.has(String(v.id))&&(activeType==='all'||taskType(v)===activeType)&&(activeTag==='all'||taskTags(v).includes(activeTag)));
  q('taskList').innerHTML=list.map((v,i)=>'<div class="offer-card"><div class="offer-img">'+['📲','🎮','📝','💳','📦','🎯'][i%6]+'</div><div><div class="earned">✓ '+Number(v.completed_count||0)+' Earned</div><div class="offer-title">'+esc(v.title)+'</div><div>'+taskTags(v).slice(0,2).map(x=>'<span class="tag">🏷 '+esc(x)+'</span>').join('')+'<span class="tag">🎁 Reward</span></div><div class="reward">🪙 '+Number(v.reward_points||v.reward||0).toLocaleString()+' Points</div><button class="earn-btn" onclick="openTask('+v.id+')">Earn</button></div></div>').join('')||'<div class="page-card">এই ফিল্টারে কোনো সক্রিয় অফার নেই</div>';
 }
 document.addEventListener('click',e=>{if(!e.target.closest('.filter-wrap'))document.querySelectorAll('.filter-menu').forEach(m=>m.classList.remove('open'))});
