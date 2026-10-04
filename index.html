@@ -134,23 +134,33 @@ async function openTask(id){
  q('taskModalBody').innerHTML='<div class="work-hero"><div class="work-title">'+esc(currentTask.title||'Task')+'</div><div class="work-reward">🪙 '+pts.toLocaleString()+' Points ≈ ৳'+money+'</div></div><p>'+esc(currentTask.description||'এই টাস্কটি সম্পন্ন করুন।')+'</p><p><b>Task Type:</b> '+esc(taskType(currentTask))+'</p><p class="muted"><b>Required proof:</b> 📸 Screenshot / Photo</p>';
  q('proofArea').classList.add('hidden');
  q('completeTaskBtn').disabled=!taskStarted;
- q('taskStartHint').textContent=taskStarted?'✅ Task already started — এখন কাজ শেষ করে ফিরে এসে Complete চাপুন।':'প্রথমে Earn / Start Task চাপুন। তারপর কাজ শেষ করে এই অ্যাপে ফিরে আসুন।';
+ q('earnTaskBtn').classList.remove('hidden');
+ q('completeTaskBtn').classList.remove('hidden');
+ q('earnTaskBtn').textContent=taskStarted?'➡️ Continue':'🚀 Earn / Start Task';
+ q('taskStartHint').textContent=taskStarted?'✅ Task চালু হয়েছিল। Continue দিয়ে আবার কাজের পেজ খুলতে পারবেন, অথবা কাজ শেষ হলে Complete চাপুন।':'প্রথমে Earn / Start Task চাপুন। তারপর আলাদা Task page-এ Continue চাপুন।';
  q('taskModal').classList.remove('hidden');
 }
 function startTaskWork(){
  if(!currentTask)return;
  const link=currentTask.task_link||currentTask.target_url||currentTask.link||currentTask.url||'';
- localStorage.setItem('task_started_'+currentTask.id,'1');
- taskStarted=true;
- q('completeTaskBtn').disabled=false;
- q('taskStartHint').textContent='✅ Task চালু হয়েছে। কাজ শেষ হলে Back করে এই অ্যাপে ফিরে আসুন।';
- if(link){
-   window.location.href=link;
- }else{
-   safeUserMessage('এই Task-এর কাজের Link দেওয়া নেই।');
- }
+ if(!link){safeUserMessage('এই Task-এর কাজের Link দেওয়া নেই।');return}
+ q('taskModalTitle').textContent='🚀 Continue Task';
+ q('taskModalBody').innerHTML='<div class="work-page"><div class="work-hero"><div class="work-title">'+esc(currentTask.title||'Task')+'</div><div class="work-reward">🪙 '+Number(currentTask.reward_points||currentTask.reward||0).toLocaleString()+' Points ≈ ৳'+(Number(currentTask.reward_points||currentTask.reward||0)/pointsPerBDT).toFixed(2)+'</div></div><p>'+esc(currentTask.description||'এই টাস্কটি সম্পন্ন করুন।')+'</p><p class="muted">Continue চাপলে Task-এর কাজের পেজ খুলবে। কাজ শেষ হলে Back করে আবার Task Earn-এ ফিরে আসুন।</p><button type="button" class="btn" style="width:100%" onclick="continueTaskWork()">➡️ Continue</button></div>';
+ q('earnTaskBtn').classList.add('hidden');
+ q('completeTaskBtn').classList.add('hidden');
+ q('proofArea').classList.add('hidden');
+ q('taskStartHint').textContent='';
+ localStorage.setItem('task_pending_id',String(currentTask.id));
 }
-function closeTask(){currentTask=null;taskStarted=false;q('taskModal').classList.add('hidden')}
+function continueTaskWork(){
+ if(!currentTask)return;
+ const link=currentTask.task_link||currentTask.target_url||currentTask.link||currentTask.url||'';
+ if(!link){safeUserMessage('এই Task-এর কাজের Link দেওয়া নেই।');return}
+ localStorage.setItem('task_started_'+currentTask.id,'1');
+ localStorage.setItem('task_pending_id',String(currentTask.id));
+ window.location.href=link;
+}
+function closeTask(){if(currentTask)localStorage.removeItem('task_pending_id');currentTask=null;taskStarted=false;q('taskModal').classList.add('hidden')}
 function showProofForm(){
  if(!currentTask||!taskStarted)return;
  q('proofArea').classList.remove('hidden');
@@ -240,7 +250,7 @@ window.showWithdrawHistory=showWithdrawHistory;
 function copyCode(){navigator.clipboard?.writeText(q('code').textContent);alert('Referral code copied')}function shareRef(){const code=q('code').textContent;const url=new URL('https://rabbi3432.github.io/Task-Earn/');if(code&&code!=='—')url.searchParams.set('ref',code);const text='Task Earn এ যোগ দিন। আমার referral link: '+url.href;if(navigator.share){navigator.share({title:'Task Earn Referral',text,url:url.href}).catch(()=>{})}else{navigator.clipboard?.writeText(url.href);alert('Referral link copied')}}async function logout(){await db.auth.signOut();location.reload()}
 Object.assign(window,{mode,submitTask,openTask,closeTask,showProofForm,submitCurrentTask,checkin,spin,withdraw,page,logout,copyCode,shareRef,selectCash,doCashout,showWithdrawHistory,toggleFilterMenu,setTypeFilter,setTagFilter});
 window.addEventListener('error',e=>{console.error(e.error||e.message);if(q('msg'))say('অ্যাপের ত্রুটি: '+e.message)});
-window.addEventListener('pageshow',()=>{if(currentTask){const started=localStorage.getItem('task_started_'+currentTask.id)==='1';if(started){taskStarted=true;if(q('completeTaskBtn'))q('completeTaskBtn').disabled=false;if(q('taskStartHint'))q('taskStartHint').textContent='✅ Task চালু হয়েছিল। কাজ শেষ হলে Complete চাপুন।'}}});
+window.addEventListener('pageshow',async()=>{const pending=localStorage.getItem('task_pending_id');if(pending&&user?.id){const started=localStorage.getItem('task_started_'+pending)==='1';if(started){await openTask(Number(pending));}}});
 document.addEventListener('DOMContentLoaded',async()=>{
  const rb=q('registerBtn');if(rb) rb.onclick=()=>doRegister(rb);
  try{const {data,error}=await db.auth.getSession();if(error)console.warn(error);if(data?.session){user=data.session.user;await enter()}}catch(e){console.error(e)}
