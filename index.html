@@ -216,10 +216,8 @@ function getTaskWorkLink(t){
  try{const u=new URL(link,location.href);u.searchParams.set('subid',user.id);u.searchParams.set('subid2',String(t.id));return u.toString()}catch(e){return link+(link.includes('?')?'&':'?')+'subid='+encodeURIComponent(user.id)+'&subid2='+encodeURIComponent(String(t.id))}
 }
 function esc(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
-async function openTask(id){
- const r=await db.from('tasks').select('*').eq('id',id).eq('is_active',true).maybeSingle();
- if(r.error||!r.data){safeUserMessage(r.error?.message||'Task পাওয়া যায়নি');return}
- currentTask=r.data;
+function renderTaskDetails(task){
+ currentTask=task;
  const key='task_started_'+currentTask.id;
  taskStarted=localStorage.getItem(key)==='1';
  q('taskModalTitle').textContent='Task Details';
@@ -244,6 +242,25 @@ async function openTask(id){
  }
  q('taskModal').classList.remove('hidden');
 }
+function openTask(id){
+ const cached=allTasks.find(t=>String(t.id)===String(id));
+ if(cached){
+  renderTaskDetails(cached);
+  // Refresh this single task in the background; never block the button/modal.
+  db.from('tasks').select('*').eq('id',id).eq('is_active',true).maybeSingle().then(r=>{
+   if(r.data && currentTask && String(currentTask.id)===String(id)) renderTaskDetails(r.data);
+  }).catch(()=>{});
+  return;
+ }
+ // Fallback only when the task is not already in the loaded list.
+ q('taskModalTitle').textContent='Task Details';
+ q('taskModalBody').innerHTML='<div class="work-page"><div class="work-title">⏳ Task loading...</div></div>';
+ q('taskModal').classList.remove('hidden');
+ db.from('tasks').select('*').eq('id',id).eq('is_active',true).maybeSingle().then(r=>{
+  if(r.error||!r.data){closeTask();safeUserMessage(r.error?.message||'Task পাওয়া যায়নি');return}
+  renderTaskDetails(r.data);
+ }).catch(e=>{closeTask();safeUserMessage(e?.message||'Task পাওয়া যায়নি')});
+}
 function startTaskWork(){
  if(!currentTask)return;
  const link=getTaskWorkLink(currentTask);
@@ -262,7 +279,8 @@ function continueTaskWork(){
  if(!link){safeUserMessage('এই Task-এর কাজের Link দেওয়া নেই।');return}
  localStorage.setItem('task_started_'+currentTask.id,'1');
  localStorage.setItem('task_pending_id',String(currentTask.id));
- window.location.href=link;
+ // Navigate immediately from the user click; no extra database request is awaited.
+ window.location.assign(link);
 }
 function closeTask(){if(currentTask)localStorage.removeItem('task_pending_id');currentTask=null;taskStarted=false;q('taskModal').classList.add('hidden')}
 function showProofForm(){
