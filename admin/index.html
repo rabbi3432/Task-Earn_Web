@@ -10,7 +10,7 @@ window.runSupabaseDiagnostic=function(){
   if(!el)return;
   el.textContent='Supabase connection checking…'; el.style.color='#64748b';
   var done=false;
-  var timer=setTimeout(function(){if(done)return;done=true;el.textContent='Supabase connection timeout';el.style.color='#b91c1c'},8000);
+  var timer=setTimeout(function(){if(done)return;done=true;el.textContent='Supabase connection timeout — network/CDN check করুন';el.style.color='#b91c1c'},8000);
   fetch(endpoint,{method:'GET',headers:{apikey:key,Authorization:'Bearer '+key},cache:'no-store'})
     .then(function(res){if(done)return;done=true;clearTimeout(timer);if(res.ok||res.status===401||res.status===403){el.textContent='Supabase reachable ✓';el.style.color='#15803d'}else{el.textContent='Supabase error: HTTP '+res.status;el.style.color='#b91c1c'}})
     .catch(function(err){if(done)return;done=true;clearTimeout(timer);el.textContent='Connection error: '+(err&&err.message?err.message:'Network error');el.style.color='#b91c1c'});
